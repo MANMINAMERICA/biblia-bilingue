@@ -283,6 +283,7 @@ function openBook(book) {
         grid.appendChild(btn);
     });
     document.getElementById('header-title').textContent = getBookDisplayName(book.book);
+    document.getElementById('chapters-book-name').textContent = getBookDisplayName(book.book);
     showView('chapters');
 }
 
