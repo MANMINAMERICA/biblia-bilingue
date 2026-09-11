@@ -239,12 +239,10 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .verse-pair:last-child { border-bottom: none; }
 .verse-pair:active { background: var(--bg-secondary); }
 
-.verse-number { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: var(--bg); color: var(--primary); border: 1.5px solid var(--primary); border-radius: 50%; font-size: 0.65rem; font-weight: 700; margin-right: 6px; vertical-align: top; flex-shrink: 0; }
+.verse-number { font-size: 0.85rem; font-weight: 800; color: var(--primary); margin-right: 4px; }
 
-.verse-ko { color: var(--text-verse-ko); font-size: var(--font-size-verse); line-height: 1.7; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 6px; font-family: 'Noto Sans KR', -apple-system, sans-serif; }
-.verse-es { color: var(--text-verse-es); font-size: calc(var(--font-size-verse) + 0.1rem); line-height: 1.7; padding-left: 28px; font-weight: 500; }
-
-.verse-es:has(.verse-number) { display: flex; align-items: flex-start; gap: 8px; padding-left: 0; }
+.verse-ko { color: var(--text-verse-ko); font-size: var(--font-size-verse); line-height: 1.7; margin-bottom: 6px; font-family: 'Noto Sans KR', -apple-system, sans-serif; }
+.verse-es { color: var(--text-verse-es); font-size: calc(var(--font-size-verse) + 0.1rem); line-height: 1.7; font-weight: 500; }
 
 /* Selection */
 .verse-selected { background: rgba(26, 35, 126, 0.12) !important; outline: 2px solid var(--primary); }
