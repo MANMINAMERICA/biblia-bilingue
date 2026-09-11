@@ -262,8 +262,8 @@ function closeBooksList() {
 // Language mode
 function setLangMode(mode) {
     langMode = mode;
-    // Update header lang buttons
-    document.querySelectorAll('.lang-btn-header').forEach(btn => {
+    // Update home lang buttons
+    document.querySelectorAll('.lang-btn-home').forEach(btn => {
         btn.classList.toggle('active', 
             (mode === 'dual' && btn.textContent === 'ES+KO') ||
             (mode === 'es' && btn.textContent === 'ES') ||

@@ -147,6 +147,39 @@ header h1 {
     border-color: white;
 }
 
+/* Language Toggle Home */
+.home-lang-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+
+.lang-toggle-home {
+    display: flex;
+    gap: 0;
+}
+
+.lang-btn-home {
+    padding: 6px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lang-btn-home:first-child { border-radius: 8px 0 0 8px; }
+.lang-btn-home:last-child { border-radius: 0 8px 8px 0; }
+.lang-btn-home + .lang-btn-home { border-left: none; }
+
+.lang-btn-home.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
 .header-actions {
     display: flex;
     gap: 4px;
