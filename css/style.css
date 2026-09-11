@@ -1,14 +1,14 @@
 :root {
-    --primary: #1a237e;
-    --primary-light: #534bae;
-    --primary-dark: #000051;
+    --primary: #0D6CFF;
+    --primary-light: #4A90FF;
+    --primary-dark: #0050CC;
     --accent: #ff6f00;
     --bg: #ffffff;
     --bg-secondary: #f5f5f5;
     --bg-card: #ffffff;
     --text: #212121;
     --text-secondary: #757575;
-    --text-verse-es: #1a237e;
+    --text-verse-es: #0D6CFF;
     --text-verse-ko: #37474f;
     --border: #e0e0e0;
     --shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -55,7 +55,7 @@ body {
 #loading-screen {
     position: fixed;
     inset: 0;
-    background: linear-gradient(135deg, #1a237e 0%, #000051 100%);
+    background: linear-gradient(135deg, #0D6CFF 0%, #0050CC 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -251,7 +251,7 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 @keyframes highlightPulse { 0% { background: var(--accent); opacity: 0.4; } 100% { background: transparent; opacity: 1; } }
 
 /* Selection Toolbar */
-.selection-toolbar { position: fixed; bottom: -100px; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: linear-gradient(135deg, #1a237e 0%, #283593 100%); color: white; box-shadow: 0 -4px 20px rgba(0,0,0,0.25); z-index: 200; transition: bottom 0.3s ease; flex-wrap: wrap; gap: 8px; }
+.selection-toolbar { position: fixed; bottom: -100px; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: linear-gradient(135deg, #0D6CFF 0%, #0050CC 100%); color: white; box-shadow: 0 -4px 20px rgba(0,0,0,0.25); z-index: 200; transition: bottom 0.3s ease; flex-wrap: wrap; gap: 8px; }
 .selection-toolbar.visible { bottom: 28px; }
 #selection-count { font-size: 0.85rem; opacity: 0.9; flex: 1; min-width: 100%; }
 .selection-actions { display: flex; gap: 8px; flex-shrink: 0; width: 100%; justify-content: center; }
