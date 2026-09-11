@@ -1,19 +1,20 @@
-const CACHE_NAME = 'biblia-bilingue-v8';
+const CACHE_NAME = 'biblia-bilingue-v9';
+const BASE = self.location.pathname.replace(/\/[^/]*$/, '/');
 const ASSETS = [
-    '/',
-    '/index.html',
-    '/css/style.css',
-    '/js/app.js',
-    '/manifest.json',
-    '/icons/icon-192.png',
-    '/icons/icon-512.png',
-    '/data/bible-combined.json'
+    '',
+    'index.html',
+    'css/style.css',
+    'js/app.js',
+    'manifest.json',
+    'icons/icon-192.png',
+    'icons/icon-512.png',
+    'data/bible-combined.json'
 ];
 
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll(ASSETS);
+            return cache.addAll(ASSETS.map(a => new URL(a, BASE).href));
         }).then(() => self.skipWaiting())
     );
 });
@@ -40,7 +41,7 @@ self.addEventListener('fetch', event => {
             });
         }).catch(() => {
             if (event.request.destination === 'document') {
-                return caches.match('/index.html');
+                return caches.match(new URL('index.html', BASE).href);
             }
         })
     );
