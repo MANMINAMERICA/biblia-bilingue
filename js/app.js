@@ -121,6 +121,8 @@ function menuAction(action) {
         showBooksView();
     } else if (action === 'themes') {
         showThemesView();
+    } else if (action === 'settings') {
+        showSettingsView();
     }
 }
 
@@ -148,6 +150,8 @@ function showView(view, pushState = true) {
             titleEl.textContent = 'Búsqueda';
         } else if (view === 'themes') {
             titleEl.textContent = 'Mis Temas';
+        } else if (view === 'settings') {
+            titleEl.textContent = 'Configuración';
         } else if (view === 'theme-detail') {
             const theme = themes.find(t => t.id === currentThemeId);
             titleEl.textContent = theme ? theme.title : 'Tema';
@@ -178,6 +182,8 @@ function goBack() {
     } else if (currentView === 'search') {
         showView('home', false);
     } else if (currentView === 'themes') {
+        showView('home', false);
+    } else if (currentView === 'settings') {
         showView('home', false);
     } else if (currentView === 'theme-detail') {
         showThemesView(false);
@@ -549,6 +555,11 @@ function renderThemesList() {
 function showThemesView(pushState = true) {
     renderThemesList();
     showView('themes', pushState);
+}
+
+function showSettingsView(pushState = true) {
+    updateGitHubStatus();
+    showView('settings', pushState);
 }
 
 function openThemeDetail(themeId) {
@@ -1057,9 +1068,9 @@ function getGistId() {
 function updateGitHubStatus() {
     const token = getGitHubToken();
     const gistId = getGistId();
-    const status = document.getElementById('github-status');
-    const btnBackup = document.getElementById('btn-backup-github');
-    const btnRestore = document.getElementById('btn-restore-github');
+    const status = document.getElementById('settings-github-status');
+    const btnBackup = document.getElementById('settings-btn-backup');
+    const btnRestore = document.getElementById('settings-btn-restore');
 
     if (!token) {
         status.textContent = 'No configurado';
