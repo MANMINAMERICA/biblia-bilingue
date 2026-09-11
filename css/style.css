@@ -926,6 +926,90 @@ html, body {
     transform: scale(0.96);
 }
 
+/* GitHub Backup Section */
+.github-backup-section {
+    margin: 16px 0;
+    padding: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.github-backup-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.github-backup-header svg {
+    color: var(--text);
+}
+
+.github-backup-status {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.github-backup-status.configured {
+    color: #2e7d32;
+}
+
+.github-backup-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.github-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.github-btn:active {
+    background: var(--primary);
+    color: white;
+}
+
+.github-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.github-btn-backup {
+    background: #1b5e20;
+    color: white;
+    border-color: #1b5e20;
+}
+
+.github-btn-backup:active {
+    background: #0d3311;
+}
+
+.github-btn-restore {
+    background: #e65100;
+    color: white;
+    border-color: #e65100;
+}
+
+.github-btn-restore:active {
+    background: #bf360c;
+}
+
 .themes-list {
     display: flex;
     flex-direction: column;

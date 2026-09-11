@@ -76,6 +76,7 @@ async function init() {
     setTimeout(() => {
         document.getElementById('loading-screen').classList.add('hidden');
         document.getElementById('app').classList.remove('hidden');
+        updateGitHubStatus();
     }, 500);
 
     loadTheme();
@@ -1042,6 +1043,173 @@ function clearHomeSearch() {
 function toggleClearBtn() {
     const val = document.getElementById('home-search-input').value;
     document.getElementById('home-clear-btn').classList.toggle('hidden', !val);
+}
+
+// ====== GITHUB BACKUP ======
+function getGitHubToken() {
+    return localStorage.getItem('github_token') || '';
+}
+
+function getGistId() {
+    return localStorage.getItem('github_gist_id') || '';
+}
+
+function updateGitHubStatus() {
+    const token = getGitHubToken();
+    const gistId = getGistId();
+    const status = document.getElementById('github-status');
+    const btnBackup = document.getElementById('btn-backup-github');
+    const btnRestore = document.getElementById('btn-restore-github');
+
+    if (!token) {
+        status.textContent = 'No configurado';
+        status.classList.remove('configured');
+        btnBackup.disabled = true;
+        btnRestore.disabled = true;
+    } else if (!gistId) {
+        status.textContent = 'Token configurado. Guarda tu primer respaldo.';
+        status.classList.remove('configured');
+        btnBackup.disabled = false;
+        btnRestore.disabled = true;
+    } else {
+        status.textContent = 'Respaldo activo en GitHub';
+        status.classList.add('configured');
+        btnBackup.disabled = false;
+        btnRestore.disabled = false;
+    }
+}
+
+function setupGitHubToken() {
+    const current = getGitHubToken();
+    const token = prompt(
+        'Ingresa tu Personal Access Token de GitHub:\n\n' +
+        '1. Ve a https://github.com/settings/tokens\n' +
+        '2. Generate new token (classic)\n' +
+        '3. Marca: gist\n' +
+        '4. Pega el token aquí:',
+        current
+    );
+    if (token === null) return;
+    if (!token.trim()) {
+        localStorage.removeItem('github_token');
+        localStorage.removeItem('github_gist_id');
+        showToast('Token eliminado');
+    } else {
+        localStorage.setItem('github_token', token.trim());
+        showToast('Token guardado');
+    }
+    updateGitHubStatus();
+}
+
+async function backupThemesToGitHub() {
+    const token = getGitHubToken();
+    if (!token) {
+        showToast('Configura el token primero');
+        return;
+    }
+
+    const gistId = getGistId();
+    const data = JSON.stringify(themes, null, 2);
+    const filename = 'biblia-temas.json';
+
+    try {
+        let response;
+        if (gistId) {
+            // Update existing gist
+            response = await fetch(`https://api.github.com/gists/${gistId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    files: {
+                        [filename]: { content: data }
+                    }
+                })
+            });
+        } else {
+            // Create new gist
+            response = await fetch('https://api.github.com/gists', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    description: 'Biblia Bilingüe - Respaldo de Temas',
+                    public: false,
+                    files: {
+                        [filename]: { content: data }
+                    }
+                })
+            });
+        }
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.message || 'Error de GitHub');
+        }
+
+        const result = await response.json();
+        localStorage.setItem('github_gist_id', result.id);
+        updateGitHubStatus();
+        showToast('Respaldo guardado en GitHub');
+    } catch (e) {
+        showToast('Error: ' + e.message);
+        console.error(e);
+    }
+}
+
+async function restoreThemesFromGitHub() {
+    const token = getGitHubToken();
+    const gistId = getGistId();
+    if (!token || !gistId) {
+        showToast('No hay respaldo configurado');
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+            headers: {
+                'Authorization': `token ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('No se pudo acceder al respaldo');
+        }
+
+        const gist = await response.json();
+        const filename = 'biblia-temas.json';
+        const file = gist.files[filename];
+        if (!file) {
+            throw new Error('Archivo de temas no encontrado en el respaldo');
+        }
+
+        const remoteThemes = JSON.parse(file.content);
+
+        if (!Array.isArray(remoteThemes)) {
+            throw new Error('Formato de datos inválido');
+        }
+
+        // Merge: keep local themes not in remote, add remote themes
+        const localIds = new Set(themes.map(t => t.id));
+        let added = 0;
+        remoteThemes.forEach(rt => {
+            if (!localIds.has(rt.id)) {
+                themes.push(rt);
+                added++;
+            }
+        });
+
+        saveThemes();
+        renderThemesList();
+        showToast(`${added} tema(s) restaurado(s) desde GitHub`);
+    } catch (e) {
+        showToast('Error: ' + e.message);
+        console.error(e);
+    }
 }
 
 // Service Worker Registration
