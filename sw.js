@@ -1,4 +1,4 @@
-const CACHE_NAME = 'biblia-bilingue-v7';
+const CACHE_NAME = 'biblia-bilingue-v8';
 const ASSETS = [
     '/',
     '/index.html',

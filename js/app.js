@@ -52,6 +52,10 @@ let searchTimeout = null;
 let selectedVerses = new Set();
 let langMode = 'dual'; // 'dual', 'es', 'ko'
 
+// Themes state
+let themes = [];
+let currentThemeId = null;
+
 // Initialize
 async function init() {
     updateLoadingProgress(10, 'Cargando base de datos...');
@@ -64,6 +68,9 @@ async function init() {
         console.error(e);
         return;
     }
+
+    // Load themes from localStorage
+    loadThemes();
 
     updateLoadingProgress(100, '¡Listo!');
     setTimeout(() => {
@@ -81,7 +88,7 @@ function updateLoadingProgress(percent, text) {
     if (label) label.textContent = text;
 }
 
-// Theme
+// Theme (dark/light)
 function loadTheme() {
     const saved = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', saved);
@@ -92,6 +99,28 @@ function toggleTheme() {
     const next = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
+}
+
+// Main Menu
+function toggleMainMenu() {
+    const menu = document.getElementById('main-menu');
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+    } else {
+        menu.classList.add('hidden');
+    }
+}
+
+function menuAction(action) {
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('search-bar').classList.add('hidden');
+
+    if (action === 'old' || action === 'new') {
+        currentTestament = action;
+        showBooksView();
+    } else if (action === 'themes') {
+        showThemesView();
+    }
 }
 
 // Navigation
@@ -116,6 +145,13 @@ function showView(view, pushState = true) {
             titleEl.textContent = `${getBookDisplayName(currentBook.book)} ${currentChapter}`;
         } else if (view === 'search') {
             titleEl.textContent = 'Búsqueda';
+        } else if (view === 'themes') {
+            titleEl.textContent = 'Mis Temas';
+        } else if (view === 'theme-detail') {
+            const theme = themes.find(t => t.id === currentThemeId);
+            titleEl.textContent = theme ? theme.title : 'Tema';
+        } else if (view === 'books') {
+            titleEl.textContent = currentTestament === 'old' ? 'Antiguo Testamento' : 'Nuevo Testamento';
         }
     }
 
@@ -131,14 +167,19 @@ function showView(view, pushState = true) {
 
 function goBack() {
     document.getElementById('search-bar').classList.add('hidden');
+    document.getElementById('main-menu').classList.add('hidden');
     if (currentView === 'reading') {
         showView('chapters', false);
     } else if (currentView === 'chapters') {
+        showBooksView(false);
+    } else if (currentView === 'books') {
         showView('home', false);
-        renderHomeBooks();
     } else if (currentView === 'search') {
         showView('home', false);
-        renderHomeBooks();
+    } else if (currentView === 'themes') {
+        showView('home', false);
+    } else if (currentView === 'theme-detail') {
+        showThemesView(false);
     } else if (currentView === 'home') {
         // Double tap to exit
         const now = Date.now();
@@ -156,7 +197,6 @@ window.addEventListener('popstate', (e) => {
     if (currentView !== 'home') {
         goBack();
     } else {
-        // On home, try to exit
         const now = Date.now();
         if (now - lastBackTap < 300) {
             window.close();
@@ -170,64 +210,17 @@ window.addEventListener('popstate', (e) => {
 // Push initial state
 history.pushState({ view: 'home' }, '', '');
 
-// Testament tabs
-function showBooks(testament) {
-    currentTestament = testament;
-    
-    // Update tab active state
-    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-        btn.classList.toggle('active', (testament === 'old' && i === 0) || (testament === 'new' && i === 1));
-    });
-    
-    document.getElementById('close-books-list').classList.remove('hidden');
-    renderHomeBooks();
-}
+// Show books list view
+function showBooksView(pushState = true) {
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('search-bar').classList.add('hidden');
 
-function clearHomeSearch() {
-    document.getElementById('home-search-input').value = '';
-    document.getElementById('home-clear-btn').classList.add('hidden');
-}
-
-function toggleClearBtn() {
-    const val = document.getElementById('home-search-input').value;
-    document.getElementById('home-clear-btn').classList.toggle('hidden', !val);
-}
-
-function closeBooksList() {
-    document.getElementById('home-books-list').innerHTML = '';
-    document.getElementById('close-books-list').classList.add('hidden');
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-}
-
-// Language mode
-function setLangMode(mode) {
-    langMode = mode;
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.toggle('active', 
-            (mode === 'dual' && btn.textContent === 'ES+KO') ||
-            (mode === 'es' && btn.textContent === 'ES') ||
-            (mode === 'ko' && btn.textContent === 'KO')
-        );
-    });
-    // Re-render current view
-    if (currentView === 'reading' && currentBook) {
-        openChapter(currentChapter);
-    } else if (currentView === 'home' && document.getElementById('home-books-list').children.length > 0) {
-        renderHomeBooks();
-    }
-}
-
-// Home books list
-function renderHomeBooks() {
     const books = currentTestament === 'old' ? OLD_TESTAMENT : NEW_TESTAMENT;
-    const container = document.getElementById('home-books-list');
-    if (!container) return;
-    container.innerHTML = '';
+    const titleEl = document.getElementById('books-title');
+    titleEl.textContent = currentTestament === 'old' ? 'Antiguo Testamento' : 'Nuevo Testamento';
 
-    // Update tab active state
-    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-        btn.classList.toggle('active', (currentTestament === 'old' && i === 0) || (currentTestament === 'new' && i === 1));
-    });
+    const container = document.getElementById('books-list');
+    container.innerHTML = '';
 
     books.forEach((bookName, index) => {
         const bookData = bibleData.find(b => b.book === bookName);
@@ -248,11 +241,35 @@ function renderHomeBooks() {
         `;
         container.appendChild(item);
     });
+
+    showView('books', pushState);
+}
+
+function closeBooksList() {
+    showView('home', false);
+}
+
+// Language mode
+function setLangMode(mode) {
+    langMode = mode;
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', 
+            (mode === 'dual' && btn.textContent === 'ES+KO') ||
+            (mode === 'es' && btn.textContent === 'ES') ||
+            (mode === 'ko' && btn.textContent === 'KO')
+        );
+    });
+    // Re-render current view
+    if (currentView === 'reading' && currentBook) {
+        openChapter(currentChapter);
+    } else if (currentView === 'books') {
+        showBooksView(false);
+    }
 }
 
 function getBookDisplayName(bookName) {
     if (langMode === 'ko') return BOOK_KO[bookName] || bookName;
-    return bookName; // Both 'dual' and 'es' show Spanish name
+    return bookName;
 }
 
 function openBook(book) {
@@ -268,7 +285,6 @@ function openBook(book) {
         grid.appendChild(btn);
     });
 
-    // Update header with book name in correct language
     document.getElementById('header-title').textContent = getBookDisplayName(book.book);
     showView('chapters');
 }
@@ -279,7 +295,6 @@ function openChapter(chapterNum) {
     const refEl = document.getElementById('reading-ref');
     refEl.textContent = `${getBookDisplayName(currentBook.book)} ${chapterNum}`;
 
-    // Update header
     document.getElementById('header-title').textContent = `${getBookDisplayName(currentBook.book)} ${chapterNum}`;
 
     const chapter = currentBook.chapters.find(c => c.chapter === chapterNum);
@@ -288,6 +303,11 @@ function openChapter(chapterNum) {
     // Clear selection
     selectedVerses.clear();
     updateSelectionUI();
+
+    // Set max for verse jump
+    const jumpInput = document.getElementById('verse-jump-input');
+    jumpInput.max = chapter.verses.length;
+    jumpInput.value = '';
 
     container.innerHTML = '';
     chapter.verses.forEach(v => {
@@ -299,7 +319,6 @@ function openChapter(chapterNum) {
         pair.dataset.es = v.es;
         pair.dataset.ko = v.ko;
 
-        // Render based on language mode
         let verseHTML = '';
         if (langMode === 'dual') {
             verseHTML = `
@@ -348,7 +367,6 @@ function openChapter(chapterNum) {
         container.appendChild(pair);
     });
 
-    // Update nav buttons
     document.getElementById('btn-prev-chapter').disabled = chapterNum <= 1;
     document.getElementById('btn-next-chapter').disabled = chapterNum >= currentBook.chapters.length;
 
@@ -366,6 +384,26 @@ function nextChapter() {
     updateSelectionUI();
     const maxCh = currentBook.chapters.length;
     if (currentChapter < maxCh) openChapter(currentChapter + 1);
+}
+
+// Verse jump
+function jumpToVerse() {
+    const input = document.getElementById('verse-jump-input');
+    const verseNum = parseInt(input.value);
+    if (!verseNum || verseNum < 1) return;
+
+    const chapter = currentBook.chapters.find(c => c.chapter === currentChapter);
+    if (!chapter || verseNum > chapter.verses.length) {
+        showToast('Versículo no encontrado');
+        return;
+    }
+
+    const verseEl = document.querySelectorAll('.verse-pair')[verseNum - 1];
+    if (verseEl) {
+        verseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        verseEl.classList.add('verse-highlight');
+        setTimeout(() => verseEl.classList.remove('verse-highlight'), 2000);
+    }
 }
 
 // Verse selection for copying
@@ -412,24 +450,16 @@ function copySelectedVerses() {
     const sorted = [...selectedVerses].map(Number).sort((a, b) => a - b);
     const from = sorted[0];
     const to = sorted[sorted.length - 1];
-    const isSingle = sorted.length === 1;
 
     let ref = `${currentBook.book} ${currentChapter}:${from}`;
-    if (!isSingle && from !== to) ref += `-${to}`;
+    if (from !== to) ref += `-${to}`;
 
     let text = ref + '\n\n';
 
     const pairs = document.querySelectorAll('.verse-pair');
     pairs.forEach(p => {
-        const v = parseInt(p.dataset.verse);
         if (selectedVerses.has(p.dataset.verse)) {
-            if (isSingle) {
-                // Single verse: no number, just text
-                text += `${p.dataset.ko}\n${p.dataset.es}\n\n`;
-            } else {
-                // Multiple verses: with number
-                text += `${v}. ${p.dataset.ko}\n${p.dataset.es}\n\n`;
-            }
+            text += `${p.dataset.ko}\n${p.dataset.es}\n\n`;
         }
     });
 
@@ -462,113 +492,249 @@ function showToast(msg) {
     setTimeout(() => toast.classList.remove('visible'), 2000);
 }
 
-// Book abbreviations mapping
-const BOOK_ALIASES = {
-    // Spanish full names (normalized without accents for matching)
-    'genesis': 'Génesis', 'gnesis': 'Génesis', 'gen': 'Génesis', 'ge': 'Génesis',
-    'exodo': 'Éxodo', 'exodus': 'Éxodo', 'exo': 'Éxodo', 'ex': 'Éxodo',
-    'levitico': 'Levítico', 'lev': 'Levítico', 'lv': 'Levítico',
-    'numeros': 'Números', 'num': 'Números', 'nm': 'Números',
-    'deuteronomio': 'Deuteronomio', 'deut': 'Deuteronomio', 'dt': 'Deuteronomio',
-    'josue': 'Josué', 'joshua': 'Josué', 'jos': 'Josué',
-    'jueces': 'Jueces', 'jue': 'Jueces',
-    'rut': 'Rut', 'ruth': 'Rut',
-    '1samuel': '1 Samuel', '1 samuel': '1 Samuel', '1 sam': '1 Samuel', '1sm': '1 Samuel',
-    '2samuel': '2 Samuel', '2 samuel': '2 Samuel', '2 sam': '2 Samuel', '2sm': '2 Samuel',
-    '1reyes': '1 Reyes', '1 reyes': '1 Reyes', '1 rey': '1 Reyes', '1rey': '1 Reyes',
-    '2reyes': '2 Reyes', '2 reyes': '2 Reyes', '2 rey': '2 Reyes', '2rey': '2 Reyes',
-    '1cron': '1 Crónicas', '1 cronicas': '1 Crónicas', '1 crónicas': '1 Crónicas',
-    '2cron': '2 Crónicas', '2 cronicas': '2 Crónicas', '2 crónicas': '2 Crónicas',
-    'esdras': 'Esdras', 'ezr': 'Esdras',
-    'nehemias': 'Nehemías', 'nehemías': 'Nehemías', 'neh': 'Nehemías',
-    'ester': 'Ester', 'est': 'Ester',
-    'job': 'Job', 'jop': 'Job',
-    'salmos': 'Salmos', 'salmo': 'Salmos', 'sal': 'Salmos', 'sl': 'Salmos', 'ps': 'Salmos', 'psa': 'Salmos',
-    'proverbios': 'Proverbios', 'prov': 'Proverbios', 'pr': 'Proverbios', 'pro': 'Proverbios',
-    'eclesiastes': 'Eclesiastés', 'ecle': 'Eclesiastés', 'ec': 'Eclesiastés', 'qoh': 'Eclesiastés',
-    'cantares': 'Cantares', 'cant': 'Cantares', 'cnt': 'Cantares', 'song': 'Cantares',
-    'isaias': 'Isaías', 'isaías': 'Isaías', 'isa': 'Isaías',
-    'jeremias': 'Jeremías', 'jeremías': 'Jeremías', 'jer': 'Jeremías',
-    'lamentaciones': 'Lamentaciones', 'lam': 'Lamentaciones',
-    'ezequiel': 'Ezequiel', 'ezeq': 'Ezequiel', 'ezq': 'Ezequiel', 'eze': 'Ezequiel',
-    'daniel': 'Daniel', 'dan': 'Daniel', 'dn': 'Daniel',
-    'oseas': 'Oseas', 'hos': 'Oseas',
-    'joel': 'Joel', 'jl': 'Joel',
-    'amos': 'Amós', 'amós': 'Amós', 'am': 'Amós',
-    'abdias': 'Abdías', 'abdías': 'Abdías', 'obd': 'Abdías', 'ob': 'Abdías',
-    'jonas': 'Jonás', 'jonás': 'Jonás', 'jon': 'Jonás',
-    'miqueas': 'Miqueas', 'mic': 'Miqueas',
-    'nahum': 'Nahúm', 'nah': 'Nahúm',
-    'habacuc': 'Habacuc', 'hab': 'Habacuc',
-    'sofonias': 'Sofonías', 'sof': 'Sofonías', 'zep': 'Sofonías',
-    'hageo': 'Hageo', 'hag': 'Hageo',
-    'zacarias': 'Zacarías', 'zacarías': 'Zacarías', 'zac': 'Zacarías', 'zech': 'Zacarías',
-    'malaquias': 'Malaquías', 'malaquías': 'Malaquías', 'mal': 'Malaquías',
-    'mateo': 'Mateo', 'mat': 'Mateo', 'mt': 'Mateo', 'matt': 'Mateo',
-    'marcos': 'Marcos', 'mar': 'Marcos', 'mk': 'Marcos', 'mr': 'Marcos', 'san marcos': 'Marcos',
-    'lucas': 'Lucas', 'luc': 'Lucas', 'lk': 'Lucas', 'lu': 'Lucas',
-    'juan': 'Juan', 'jhn': 'Juan', 'jn': 'Juan', 'san juan': 'Juan',
-    'hechos': 'Hechos', 'act': 'Hechos', 'act': 'Hechos',
-    'romanos': 'Romanos', 'rom': 'Romanos', 'rm': 'Romanos',
-    '1cor': '1 Corintios', '1 corintios': '1 Corintios', '1 co': '1 Corintios', '1co': '1 Corintios',
-    '2cor': '2 Corintios', '2 corintios': '2 Corintios', '2 co': '2 Corintios', '2co': '2 Corintios',
-    'galatas': 'Gálatas', 'gal': 'Gálatas',
-    'efesios': 'Efesios', 'ef': 'Efesios', 'eph': 'Efesios',
-    'filipenses': 'Filipenses', 'fil': 'Filipenses', 'phil': 'Filipenses', 'flp': 'Filipenses',
-    'colosenses': 'Colosenses', 'col': 'Colosenses',
-    '1tes': '1 Tesalonicenses', '1 tesalonicenses': '1 Tesalonicenses', '1 th': '1 Tesalonicenses',
-    '2tes': '2 Tesalonicenses', '2 tesalonicenses': '2 Tesalonicenses', '2 th': '2 Tesalonicenses',
-    '1tim': '1 Timoteo', '1 timoteo': '1 Timoteo',
-    '2tim': '2 Timoteo', '2 timoteo': '2 Timoteo',
-    'tito': 'Tito', 'tit': 'Tito', 'titus': 'Tito',
-    'filemon': 'Filemón', 'filemón': 'Filemón', 'flm': 'Filemón', 'phm': 'Filemón',
-    'hebreos': 'Hebreos', 'heb': 'Hebreos', 'hrb': 'Hebreos',
-    'santiago': 'Santiago', 'sant': 'Santiago', 'stg': 'Santiago', 'jas': 'Santiago',
-    '1ped': '1 Pedro', '1 pedro': '1 Pedro', '1pet': '1 Pedro',
-    '2ped': '2 Pedro', '2 pedro': '2 Pedro', '2pet': '2 Pedro',
-    '1juan': '1 Juan', '1 juan': '1 Juan', '1jn': '1 Juan',
-    '2juan': '2 Juan', '2 juan': '2 Juan', '2jn': '2 Juan',
-    '3juan': '3 Juan', '3 juan': '3 Juan', '3jn': '3 Juan',
-    'judas': 'Judas', 'jud': 'Judas', 'jde': 'Judas',
-    'apocalipsis': 'Apocalipsis', 'apoc': 'Apocalipsis', 'rev': 'Apocalipsis', 'ap': 'Apocalipsis'
-};
-
-function normalizeText(str) {
-    return str.toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/\s+/g, ' ').trim();
-}
-
-function matchBookName(input) {
-    const normalized = normalizeText(input);
-    // Direct match
-    if (BOOK_ALIASES[normalized]) return BOOK_ALIASES[normalized];
-    // Try with common prefixes removed
-    const cleaned = normalized.replace(/^(san|santa|el|la|los|las|s)\s+/i, '');
-    if (BOOK_ALIASES[cleaned]) return BOOK_ALIASES[cleaned];
-    // Fuzzy: check if input starts with any alias
-    for (const [alias, fullName] of Object.entries(BOOK_ALIASES)) {
-        if (normalized.startsWith(alias) || alias.startsWith(normalized)) return fullName;
+// ====== THEMES ======
+function loadThemes() {
+    try {
+        themes = JSON.parse(localStorage.getItem('bible_themes') || '[]');
+    } catch (e) {
+        themes = [];
     }
-    return null;
 }
 
-// Parse reference like "Marcos 3:5", "Sal 23", "Juan 3:16-18", "Gen 1:1-3"
-function parseReference(query) {
-    const q = query.trim();
-    // Pattern: Book Chapter:VerseRange  or  Book Chapter
-    const match = q.match(/^(.+?)\s+(\d+)(?::(\d+)(?:\s*[-–]\s*(\d+))?)?\s*$/i);
-    if (!match) return null;
+function saveThemes() {
+    localStorage.setItem('bible_themes', JSON.stringify(themes));
+}
 
-    const bookInput = match[1].trim();
-    const chapter = parseInt(match[2]);
-    const verseFrom = match[3] ? parseInt(match[3]) : null;
-    const verseTo = match[4] ? parseInt(match[4]) : verseFrom;
+function showNewThemeDialog() {
+    const title = prompt('Nombre del tema:');
+    if (!title || !title.trim()) return;
 
-    const bookName = matchBookName(bookInput);
-    if (!bookName) return null;
+    const theme = {
+        id: Date.now().toString(),
+        title: title.trim(),
+        verses: []
+    };
+    themes.push(theme);
+    saveThemes();
+    renderThemesList();
+    showToast('Tema creado');
+}
 
-    return { book: bookName, chapter, verseFrom, verseTo };
+function renderThemesList() {
+    const container = document.getElementById('themes-list');
+    container.innerHTML = '';
+
+    if (themes.length === 0) {
+        container.innerHTML = '<div class="no-results">No tienes temas guardados.<br>Crea uno para guardar versículos favoritos.</div>';
+        return;
+    }
+
+    themes.forEach(theme => {
+        const item = document.createElement('div');
+        item.className = 'theme-item';
+        item.onclick = () => openThemeDetail(theme.id);
+        item.innerHTML = `
+            <div class="theme-icon">&#128214;</div>
+            <div class="theme-info">
+                <div class="theme-name">${theme.title}</div>
+                <div class="theme-count">${theme.verseSCount || 0} versículo(s)</div>
+            </div>
+            <div class="theme-arrow">&#9654;</div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function showThemesView(pushState = true) {
+    renderThemesList();
+    showView('themes', pushState);
+}
+
+function openThemeDetail(themeId) {
+    currentThemeId = themeId;
+    const theme = themes.find(t => t.id === themeId);
+    if (!theme) return;
+
+    document.getElementById('theme-detail-title').textContent = theme.title;
+    renderThemeVerses(theme);
+    showView('theme-detail');
+}
+
+function renderThemeVerses(theme) {
+    const container = document.getElementById('theme-detail-verses');
+    container.innerHTML = '';
+
+    if (!theme.verses || theme.verses.length === 0) {
+        container.innerHTML = '<div class="no-results">Este tema no tiene versículos.<br>Selecciona versículos en la lectura y toca "Guardar".</div>';
+        return;
+    }
+
+    theme.verses.forEach((v, idx) => {
+        const item = document.createElement('div');
+        item.className = 'theme-verse-item';
+        item.innerHTML = `
+            <div class="theme-verse-row">
+                <div class="theme-verse-content" onclick="goToThemeVerse('${v.book}', ${v.chapter}, ${v.verse})">
+                    <div class="theme-verse-ref">${v.book} ${v.chapter}:${v.verse}</div>
+                    <div class="theme-verse-ko">${v.ko}</div>
+                    <div class="theme-verse-es">${v.es}</div>
+                </div>
+                <button class="theme-verse-delete" onclick="event.stopPropagation(); removeVerseFromTheme('${theme.id}', ${idx})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function goToThemeVerse(bookName, chapter, verse) {
+    const book = bibleData.find(b => b.book === bookName);
+    if (!book) return;
+    currentBook = book;
+    currentChapter = chapter;
+    openChapter(chapter);
+    setTimeout(() => {
+        const verseEl = document.querySelectorAll('.verse-pair')[verse - 1];
+        if (verseEl) {
+            verseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            verseEl.classList.add('verse-highlight');
+            setTimeout(() => verseEl.classList.remove('verse-highlight'), 2000);
+        }
+    }, 100);
+}
+
+function removeVerseFromTheme(themeId, idx) {
+    const theme = themes.find(t => t.id === themeId);
+    if (!theme) return;
+    theme.verses.splice(idx, 1);
+    theme.verseSCount = theme.verses.length;
+    saveThemes();
+    renderThemeVerses(theme);
+    showToast('Versículo eliminado del tema');
+}
+
+function renameCurrentTheme() {
+    const theme = themes.find(t => t.id === currentThemeId);
+    if (!theme) return;
+    const newTitle = prompt('Nuevo nombre:', theme.title);
+    if (!newTitle || !newTitle.trim()) return;
+    theme.title = newTitle.trim();
+    saveThemes();
+    document.getElementById('theme-detail-title').textContent = theme.title;
+    showToast('Nombre actualizado');
+}
+
+function deleteCurrentTheme() {
+    const theme = themes.find(t => t.id === currentThemeId);
+    if (!theme) return;
+    if (!confirm(`¿Eliminar el tema "${theme.title}"?`)) return;
+    themes = themes.filter(t => t.id !== currentThemeId);
+    saveThemes();
+    showThemesView(false);
+    showToast('Tema eliminado');
+}
+
+function copyCurrentTheme() {
+    const theme = themes.find(t => t.id === currentThemeId);
+    if (!theme || !theme.verses || theme.verses.length === 0) {
+        showToast('No hay versículos para copiar');
+        return;
+    }
+
+    let text = `📌 ${theme.title}\n\n`;
+    theme.verses.forEach(v => {
+        text += `${v.book} ${v.chapter}:${v.verse}\n`;
+        text += `${v.ko}\n${v.es}\n\n`;
+    });
+
+    const ta = document.createElement('textarea');
+    ta.value = text.trim();
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    ta.style.top = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+
+    try {
+        document.execCommand('copy');
+        showToast('Tema copiado al portapapeles');
+    } catch (err) {
+        showToast('Error al copiar');
+    }
+
+    document.body.removeChild(ta);
+}
+
+function showSaveToThemeDialog() {
+    if (selectedVerses.size === 0) return;
+
+    if (themes.length === 0) {
+        const title = prompt('Primero crea un tema. Nombre del tema:');
+        if (!title || !title.trim()) return;
+        const theme = {
+            id: Date.now().toString(),
+            title: title.trim(),
+            verses: []
+        };
+        themes.push(theme);
+        saveThemes();
+        saveVersesToTheme(theme.id);
+    } else {
+        // Show theme selection
+        let msg = 'Selecciona un tema:\n\n';
+        themes.forEach((t, i) => {
+            msg += `${i + 1}. ${t.title}\n`;
+        });
+        msg += '\nEscribe el número:';
+        const choice = prompt(msg);
+        const idx = parseInt(choice) - 1;
+        if (idx < 0 || idx >= themes.length) {
+            showToast('Selección inválida');
+            return;
+        }
+        saveVersesToTheme(themes[idx].id);
+    }
+}
+
+function saveVersesToTheme(themeId) {
+    const theme = themes.find(t => t.id === themeId);
+    if (!theme) return;
+
+    let added = 0;
+    const pairs = document.querySelectorAll('.verse-pair');
+    pairs.forEach(p => {
+        if (selectedVerses.has(p.dataset.verse)) {
+            const v = {
+                book: p.dataset.book,
+                chapter: parseInt(p.dataset.chapter),
+                verse: parseInt(p.dataset.verse),
+                es: p.dataset.es,
+                ko: p.dataset.ko
+            };
+            // Check for duplicates
+            const exists = theme.verses.some(ev => 
+                ev.book === v.book && ev.chapter === v.chapter && ev.verse === v.verse
+            );
+            if (!exists) {
+                theme.verses.push(v);
+                added++;
+            }
+        }
+    });
+
+    theme.verseSCount = theme.verses.length;
+    saveThemes();
+    clearSelection();
+
+    if (added > 0) {
+        showToast(`${added} versículo(s) guardado(s) en "${theme.title}"`);
+    } else {
+        showToast('Los versículos ya estaban en el tema');
+    }
 }
 
 // Home search
@@ -577,14 +743,12 @@ function homeSearch() {
     const query = input.value.trim();
     if (!query) return;
 
-    // Try reference search first
     const ref = parseReference(query);
     if (ref) {
         navigateToReference(ref);
         return;
     }
 
-    // Fallback: text search
     document.getElementById('search-input').value = query;
     performTextSearch(query);
 }
@@ -605,7 +769,6 @@ function navigateToReference(ref) {
     currentBook = book;
 
     if (ref.verseFrom) {
-        // Open chapter and show specific verse(s)
         openChapter(ref.chapter);
         setTimeout(() => {
             const verses = document.querySelectorAll('.verse-pair');
@@ -617,12 +780,11 @@ function navigateToReference(ref) {
             }
         }, 100);
     } else {
-        // Open whole chapter
         openChapter(ref.chapter);
     }
 }
 
-// Header search bar (toggle)
+// Header search bar
 function toggleSearch() {
     const bar = document.getElementById('search-bar');
     const input = document.getElementById('search-input');
@@ -645,7 +807,6 @@ function debounceSearch() {
     searchTimeout = setTimeout(() => {
         const query = document.getElementById('search-input').value.trim();
         if (!query) return;
-        // Try reference first
         const ref = parseReference(query);
         if (ref) {
             navigateToReference(ref);
@@ -713,7 +874,6 @@ function performTextSearch(query) {
         });
         container.innerHTML = html;
 
-        // Store results for copying
         window._lastSearchResults = results;
         window._lastSearchQuery = query;
     }
@@ -769,6 +929,119 @@ function copySearchResults() {
     }
 
     document.body.removeChild(ta);
+}
+
+// Book abbreviations mapping
+const BOOK_ALIASES = {
+    'genesis': 'Génesis', 'gnesis': 'Génesis', 'gen': 'Génesis', 'ge': 'Génesis',
+    'exodo': 'Éxodo', 'exodus': 'Éxodo', 'exo': 'Éxodo', 'ex': 'Éxodo',
+    'levitico': 'Levítico', 'lev': 'Levítico', 'lv': 'Levítico',
+    'numeros': 'Números', 'num': 'Números', 'nm': 'Números',
+    'deuteronomio': 'Deuteronomio', 'deut': 'Deuteronomio', 'dt': 'Deuteronomio',
+    'josue': 'Josué', 'joshua': 'Josué', 'jos': 'Josué',
+    'jueces': 'Jueces', 'jue': 'Jueces',
+    'rut': 'Rut', 'ruth': 'Rut',
+    '1samuel': '1 Samuel', '1 samuel': '1 Samuel', '1 sam': '1 Samuel', '1sm': '1 Samuel',
+    '2samuel': '2 Samuel', '2 samuel': '2 Samuel', '2 sam': '2 Samuel', '2sm': '2 Samuel',
+    '1reyes': '1 Reyes', '1 reyes': '1 Reyes', '1 rey': '1 Reyes', '1rey': '1 Reyes',
+    '2reyes': '2 Reyes', '2 reyes': '2 Reyes', '2 rey': '2 Reyes', '2rey': '2 Reyes',
+    '1cron': '1 Crónicas', '1 cronicas': '1 Crónicas', '1 crónicas': '1 Crónicas',
+    '2cron': '2 Crónicas', '2 cronicas': '2 Crónicas', '2 crónicas': '2 Crónicas',
+    'esdras': 'Esdras', 'ezr': 'Esdras',
+    'nehemias': 'Nehemías', 'nehemías': 'Nehemías', 'neh': 'Nehemías',
+    'ester': 'Ester', 'est': 'Ester',
+    'job': 'Job', 'jop': 'Job',
+    'salmos': 'Salmos', 'salmo': 'Salmos', 'sal': 'Salmos', 'sl': 'Salmos', 'ps': 'Salmos', 'psa': 'Salmos',
+    'proverbios': 'Proverbios', 'prov': 'Proverbios', 'pr': 'Proverbios', 'pro': 'Proverbios',
+    'eclesiastes': 'Eclesiastés', 'ecle': 'Eclesiastés', 'ec': 'Eclesiastés', 'qoh': 'Eclesiastés',
+    'cantares': 'Cantares', 'cant': 'Cantares', 'cnt': 'Cantares', 'song': 'Cantares',
+    'isaias': 'Isaías', 'isaías': 'Isaías', 'isa': 'Isaías',
+    'jeremias': 'Jeremías', 'jeremías': 'Jeremías', 'jer': 'Jeremías',
+    'lamentaciones': 'Lamentaciones', 'lam': 'Lamentaciones',
+    'ezequiel': 'Ezequiel', 'ezeq': 'Ezequiel', 'ezq': 'Ezequiel', 'eze': 'Ezequiel',
+    'daniel': 'Daniel', 'dan': 'Daniel', 'dn': 'Daniel',
+    'oseas': 'Oseas', 'hos': 'Oseas',
+    'joel': 'Joel', 'jl': 'Joel',
+    'amos': 'Amós', 'amós': 'Amós', 'am': 'Amós',
+    'abdias': 'Abdías', 'abdías': 'Abdías', 'obd': 'Abdías', 'ob': 'Abdías',
+    'jonas': 'Jonás', 'jonás': 'Jonás', 'jon': 'Jonás',
+    'miqueas': 'Miqueas', 'mic': 'Miqueas',
+    'nahum': 'Nahúm', 'nah': 'Nahúm',
+    'habacuc': 'Habacuc', 'hab': 'Habacuc',
+    'sofonias': 'Sofonías', 'sof': 'Sofonías', 'zep': 'Sofonías',
+    'hageo': 'Hageo', 'hag': 'Hageo',
+    'zacarias': 'Zacarías', 'zacarías': 'Zacarías', 'zac': 'Zacarías', 'zech': 'Zacarías',
+    'malaquias': 'Malaquías', 'malaquías': 'Malaquías', 'mal': 'Malaquías',
+    'mateo': 'Mateo', 'mat': 'Mateo', 'mt': 'Mateo', 'matt': 'Mateo',
+    'marcos': 'Marcos', 'mar': 'Marcos', 'mk': 'Marcos', 'mr': 'Marcos', 'san marcos': 'Marcos',
+    'lucas': 'Lucas', 'luc': 'Lucas', 'lk': 'Lucas', 'lu': 'Lucas',
+    'juan': 'Juan', 'jhn': 'Juan', 'jn': 'Juan', 'san juan': 'Juan',
+    'hechos': 'Hechos', 'act': 'Hechos',
+    'romanos': 'Romanos', 'rom': 'Romanos', 'rm': 'Romanos',
+    '1cor': '1 Corintios', '1 corintios': '1 Corintios', '1 co': '1 Corintios', '1co': '1 Corintios',
+    '2cor': '2 Corintios', '2 corintios': '2 Corintios', '2 co': '2 Corintios', '2co': '2 Corintios',
+    'galatas': 'Gálatas', 'gal': 'Gálatas',
+    'efesios': 'Efesios', 'ef': 'Efesios', 'eph': 'Efesios',
+    'filipenses': 'Filipenses', 'fil': 'Filipenses', 'phil': 'Filipenses', 'flp': 'Filipenses',
+    'colosenses': 'Colosenses', 'col': 'Colosenses',
+    '1tes': '1 Tesalonicenses', '1 tesalonicenses': '1 Tesalonicenses', '1 th': '1 Tesalonicenses',
+    '2tes': '2 Tesalonicenses', '2 tesalonicenses': '2 Tesalonicenses', '2 th': '2 Tesalonicenses',
+    '1tim': '1 Timoteo', '1 timoteo': '1 Timoteo',
+    '2tim': '2 Timoteo', '2 timoteo': '2 Timoteo',
+    'tito': 'Tito', 'tit': 'Tito', 'titus': 'Tito',
+    'filemon': 'Filemón', 'filemón': 'Filemón', 'flm': 'Filemón', 'phm': 'Filemón',
+    'hebreos': 'Hebreos', 'heb': 'Hebreos', 'hrb': 'Hebreos',
+    'santiago': 'Santiago', 'sant': 'Santiago', 'stg': 'Santiago', 'jas': 'Santiago',
+    '1ped': '1 Pedro', '1 pedro': '1 Pedro', '1pet': '1 Pedro',
+    '2ped': '2 Pedro', '2 pedro': '2 Pedro', '2pet': '2 Pedro',
+    '1juan': '1 Juan', '1 juan': '1 Juan', '1jn': '1 Juan',
+    '2juan': '2 Juan', '2 juan': '2 Juan', '2jn': '2 Juan',
+    '3juan': '3 Juan', '3 juan': '3 Juan', '3jn': '3 Juan',
+    'judas': 'Judas', 'jud': 'Judas', 'jde': 'Judas',
+    'apocalipsis': 'Apocalipsis', 'apoc': 'Apocalipsis', 'rev': 'Apocalipsis', 'ap': 'Apocalipsis'
+};
+
+function normalizeText(str) {
+    return str.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, ' ').trim();
+}
+
+function matchBookName(input) {
+    const normalized = normalizeText(input);
+    if (BOOK_ALIASES[normalized]) return BOOK_ALIASES[normalized];
+    const cleaned = normalized.replace(/^(san|santa|el|la|los|las|s)\s+/i, '');
+    if (BOOK_ALIASES[cleaned]) return BOOK_ALIASES[cleaned];
+    for (const [alias, fullName] of Object.entries(BOOK_ALIASES)) {
+        if (normalized.startsWith(alias) || alias.startsWith(normalized)) return fullName;
+    }
+    return null;
+}
+
+function parseReference(query) {
+    const q = query.trim();
+    const match = q.match(/^(.+?)\s+(\d+)(?::(\d+)(?:\s*[-–]\s*(\d+))?)?\s*$/i);
+    if (!match) return null;
+
+    const bookInput = match[1].trim();
+    const chapter = parseInt(match[2]);
+    const verseFrom = match[3] ? parseInt(match[3]) : null;
+    const verseTo = match[4] ? parseInt(match[4]) : verseFrom;
+
+    const bookName = matchBookName(bookInput);
+    if (!bookName) return null;
+
+    return { book: bookName, chapter, verseFrom, verseTo };
+}
+
+function clearHomeSearch() {
+    document.getElementById('home-search-input').value = '';
+    document.getElementById('home-clear-btn').classList.add('hidden');
+}
+
+function toggleClearBtn() {
+    const val = document.getElementById('home-search-input').value;
+    document.getElementById('home-clear-btn').classList.toggle('hidden', !val);
 }
 
 // Service Worker Registration
