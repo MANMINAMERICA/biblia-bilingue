@@ -38,11 +38,6 @@
             </button>
             <h1 id="header-title">Biblia Bilingüe</h1>
             <div class="header-actions">
-                <button id="btn-menu" class="icon-btn" onclick="toggleMainMenu()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 12h18M3 6h18M3 18h18"/>
-                    </svg>
-                </button>
                 <button id="btn-settings" class="icon-btn" onclick="openSettings()">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -56,30 +51,11 @@
             </div>
         </header>
 
-        <!-- Main Menu Dropdown -->
-        <div id="main-menu" class="main-menu hidden">
-            <button class="menu-item" onclick="menuAction('old')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                Antiguo Testamento
-            </button>
-            <button class="menu-item" onclick="menuAction('new')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                Nuevo Testamento
-            </button>
-            <button class="menu-item" onclick="menuAction('themes')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                Mis Temas
-            </button>
-        </div>
-
-        <!-- Search Bar -->
-        <div id="search-bar" class="hidden">
-            <input type="text" id="search-input" placeholder="Buscar en la Biblia..." oninput="debounceSearch()">
-            <button class="icon-btn" onclick="clearSearch()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-            </button>
+        <!-- Tab Bar -->
+        <div id="tab-bar" class="tab-bar">
+            <button class="tab-item active" onclick="tabAction('old')">Antiguo</button>
+            <button class="tab-item" onclick="tabAction('new')">Nuevo</button>
+            <button class="tab-item" onclick="tabAction('themes')">Temas</button>
         </div>
 
         <!-- Content Views -->
@@ -121,14 +97,6 @@
 
             <!-- Books View -->
             <div id="view-books" class="view hidden">
-                <div class="books-header">
-                    <h2 id="books-title" class="section-title"></h2>
-                    <button class="close-books-x" onclick="closeBooksList()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M18 6L6 18M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
                 <div id="books-list" class="books-grid"></div>
             </div>
 
@@ -176,9 +144,44 @@
                 <div id="themes-list" class="themes-list"></div>
             </div>
 
+            <!-- Theme Detail View -->
+            <div id="view-theme-detail" class="view hidden">
+                <div class="theme-detail-header">
+                    <h2 id="theme-detail-title" class="section-title"></h2>
+                    <div class="theme-detail-actions">
+                        <button class="theme-action-btn" onclick="renameCurrentTheme()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                        </button>
+                        <button class="theme-action-btn theme-action-delete" onclick="deleteCurrentTheme()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <button class="copy-theme-btn" onclick="copyCurrentTheme()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    Copiar todos los versículos
+                </button>
+                <div id="theme-detail-verses" class="theme-detail-verses"></div>
+            </div>
+
             <!-- Settings View -->
             <div id="view-settings" class="view hidden">
                 <h2 class="section-title">Configuración</h2>
+
+                <div class="settings-section">
+                    <h3 class="settings-subtitle">Tamaño de fuente</h3>
+                    <div class="font-size-control">
+                        <button class="font-size-btn" onclick="changeFontSize(-1)">A-</button>
+                        <span id="font-size-label">16px</span>
+                        <button class="font-size-btn" onclick="changeFontSize(1)">A+</button>
+                    </div>
+                </div>
 
                 <div class="settings-section">
                     <h3 class="settings-subtitle">Respaldo local</h3>
@@ -226,33 +229,21 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Theme Detail View -->
-            <div id="view-theme-detail" class="view hidden">
-                <div class="theme-detail-header">
-                    <h2 id="theme-detail-title" class="section-title"></h2>
-                    <div class="theme-detail-actions">
-                        <button class="theme-action-btn" onclick="renameCurrentTheme()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                        </button>
-                        <button class="theme-action-btn theme-action-delete" onclick="deleteCurrentTheme()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <button class="copy-theme-btn" onclick="copyCurrentTheme()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                    </svg>
-                    Copiar todos los versículos
-                </button>
-                <div id="theme-detail-verses" class="theme-detail-verses"></div>
-            </div>
         </main>
+
+        <!-- Floating Scroll Buttons -->
+        <div id="scroll-buttons" class="scroll-buttons hidden">
+            <button class="scroll-btn" onclick="scrollToTop()" title="Arriba">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="18 15 12 9 6 15"/>
+                </svg>
+            </button>
+            <button class="scroll-btn" onclick="scrollToBottom()" title="Abajo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+        </div>
 
         <!-- Selection Toolbar -->
         <div id="selection-toolbar" class="selection-toolbar">
