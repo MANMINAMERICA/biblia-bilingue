@@ -207,10 +207,12 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 
 /* Books Grid */
 .section-title { font-size: 1.2rem; color: var(--primary); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+.section-title.no-border { border-bottom: none; padding-bottom: 0; margin-bottom: 8px; }
 .books-grid { display: grid; grid-template-columns: 1fr; gap: 4px; }
 
 /* Chapters Grid */
-.chapters-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.chapters-view-title { font-size: 1.3rem; font-weight: 700; color: var(--text); padding: 16px 0 12px; }
+.chapters-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; padding-top: 8px; }
 .chapter-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 500; color: var(--text); cursor: pointer; transition: all 0.2s; }
 .chapter-btn:active { background: var(--primary); color: white; border-color: var(--primary); }
 
