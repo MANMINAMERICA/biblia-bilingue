@@ -149,10 +149,10 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .lang-btn-home {
     padding: 6px 12px;
     background: var(--bg);
-    border: 2px solid var(--primary);
+    border: 1px solid var(--border);
     font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--primary);
+    font-weight: 600;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -164,7 +164,7 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .lang-btn-home.active {
     background: var(--bg);
     color: var(--primary);
-    border-color: var(--primary);
+    border: 2px solid var(--primary);
     font-weight: 800;
 }
 
@@ -237,7 +237,7 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .verse-pair:last-child { border-bottom: none; }
 .verse-pair:active { background: var(--bg-secondary); }
 
-.verse-number { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: var(--bg); color: var(--primary); border: 2px solid var(--primary); border-radius: 50%; font-size: 0.65rem; font-weight: 700; margin-right: 6px; vertical-align: top; flex-shrink: 0; }
+.verse-number { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: var(--bg); color: var(--primary); border: 1.5px solid var(--primary); border-radius: 50%; font-size: 0.65rem; font-weight: 700; margin-right: 6px; vertical-align: top; flex-shrink: 0; }
 
 .verse-ko { color: var(--text-verse-ko); font-size: var(--font-size-verse); line-height: 1.7; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 6px; font-family: 'Noto Sans KR', -apple-system, sans-serif; }
 .verse-es { color: var(--text-verse-es); font-size: calc(var(--font-size-verse) + 0.1rem); line-height: 1.7; padding-left: 28px; font-weight: 500; }
