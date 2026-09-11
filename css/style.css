@@ -119,6 +119,34 @@ header h1 {
     font-weight: 600;
 }
 
+/* Language Toggle Header */
+.lang-toggle-header {
+    display: flex;
+    gap: 0;
+    flex-shrink: 0;
+}
+
+.lang-btn-header {
+    padding: 5px 8px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lang-btn-header:first-child { border-radius: 6px 0 0 6px; }
+.lang-btn-header:last-child { border-radius: 0 6px 6px 0; }
+.lang-btn-header + .lang-btn-header { border-left: none; }
+
+.lang-btn-header.active {
+    background: white;
+    color: var(--primary);
+    border-color: white;
+}
+
 .header-actions {
     display: flex;
     gap: 4px;

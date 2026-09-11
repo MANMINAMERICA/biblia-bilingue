@@ -121,9 +121,12 @@ function menuAction(action) {
         showBooksView();
     } else if (action === 'themes') {
         showThemesView();
-    } else if (action === 'settings') {
-        showSettingsView();
     }
+}
+
+function openSettings() {
+    document.getElementById('main-menu').classList.add('hidden');
+    showSettingsView();
 }
 
 // Navigation
@@ -259,7 +262,8 @@ function closeBooksList() {
 // Language mode
 function setLangMode(mode) {
     langMode = mode;
-    document.querySelectorAll('.lang-btn').forEach(btn => {
+    // Update header lang buttons
+    document.querySelectorAll('.lang-btn-header').forEach(btn => {
         btn.classList.toggle('active', 
             (mode === 'dual' && btn.textContent === 'ES+KO') ||
             (mode === 'es' && btn.textContent === 'ES') ||
@@ -1110,6 +1114,61 @@ function setupGitHubToken() {
         showToast('Token guardado');
     }
     updateGitHubStatus();
+}
+
+// ====== LOCAL EXPORT/IMPORT ======
+function exportThemesLocal() {
+    if (themes.length === 0) {
+        showToast('No hay temas para exportar');
+        return;
+    }
+
+    const data = JSON.stringify(themes, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'biblia-temas-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Archivo descargado');
+}
+
+function importThemesLocal() {
+    document.getElementById('import-file-input').click();
+}
+
+function handleImportFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (!Array.isArray(imported)) {
+                throw new Error('Formato inválido');
+            }
+
+            const localIds = new Set(themes.map(t => t.id));
+            let added = 0;
+            imported.forEach(t => {
+                if (!localIds.has(t.id)) {
+                    themes.push(t);
+                    added++;
+                }
+            });
+
+            saveThemes();
+            showToast(`${added} tema(s) importado(s)`);
+        } catch (err) {
+            showToast('Error: archivo inválido');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
 }
 
 async function backupThemesToGitHub() {
