@@ -505,21 +505,38 @@ function copyCurrentTheme() {
 function showSaveToThemeDialog() {
     if (selectedVerses.size === 0) return;
     if (themes.length === 0) {
-        const title = prompt('Primero crea un tema. Nombre del tema:');
-        if (!title || !title.trim()) return;
-        const theme = { id: Date.now().toString(), title: title.trim(), verses: [] };
-        themes.push(theme);
-        saveThemes();
-        saveVersesToTheme(theme.id);
+        createThemeAndSave();
     } else {
-        let msg = 'Selecciona un tema:\n\n';
-        themes.forEach((t, i) => { msg += `${i + 1}. ${t.title}\n`; });
-        msg += '\nEscribe el número:';
-        const choice = prompt(msg);
-        const idx = parseInt(choice) - 1;
-        if (idx < 0 || idx >= themes.length) { showToast('Selección inválida'); return; }
-        saveVersesToTheme(themes[idx].id);
+        renderThemePicker();
+        document.getElementById('theme-picker-modal').classList.remove('hidden');
     }
+}
+
+function closeThemePicker() {
+    document.getElementById('theme-picker-modal').classList.add('hidden');
+}
+
+function renderThemePicker() {
+    const container = document.getElementById('theme-picker-list');
+    container.innerHTML = '';
+    themes.forEach(theme => {
+        const btn = document.createElement('button');
+        btn.className = 'theme-picker-item';
+        btn.onclick = () => { saveVersesToTheme(theme.id); closeThemePicker(); };
+        btn.innerHTML = `<div class="theme-picker-icon">&#128214;</div><div class="theme-picker-info"><div class="theme-picker-name">${theme.title}</div><div class="theme-picker-count">${(theme.verses || []).length} versículo(s)</div></div>`;
+        container.appendChild(btn);
+    });
+}
+
+function createThemeAndSave() {
+    const title = prompt('Nombre del nuevo tema:');
+    if (!title || !title.trim()) return;
+    const theme = { id: Date.now().toString(), title: title.trim(), verses: [] };
+    themes.push(theme);
+    saveThemes();
+    saveVersesToTheme(theme.id);
+    closeThemePicker();
+    showToast('Tema creado');
 }
 
 function saveVersesToTheme(themeId) {
