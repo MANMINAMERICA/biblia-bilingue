@@ -197,6 +197,18 @@
                             <span class="color-swatch" style="background: #E65100"></span>
                             <span>Naranja</span>
                         </button>
+                        <button class="color-theme-btn" data-color="custom" onclick="openColorPicker()">
+                            <span class="color-swatch color-swatch-custom" id="custom-swatch"></span>
+                            <span>Personalizar</span>
+                        </button>
+                    </div>
+                    <div id="custom-color-section" class="custom-color-section hidden">
+                        <label class="custom-color-label">Color personalizado</label>
+                        <div class="custom-color-row">
+                            <input type="color" id="custom-color-input" value="#0D6CFF" class="custom-color-input">
+                            <span id="custom-color-hex" class="custom-color-hex">#0D6CFF</span>
+                            <button class="custom-color-apply" onclick="applyCustomColor()">Aplicar</button>
+                        </div>
                     </div>
                 </div>
 

@@ -82,6 +82,7 @@
     --primary-dark: #E65100;
     --text-verse-es: #FFCC80;
 }
+/* Custom color uses inline styles from JS */
 
 * {
     margin: 0;
@@ -409,6 +410,18 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .color-theme-btn:active { transform: scale(0.95); }
 .color-theme-btn.active { border-color: var(--primary); background: var(--primary); color: white; }
 .color-theme-btn .color-swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+.color-swatch-custom { background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red) !important; }
+
+/* Custom Color Picker */
+.custom-color-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.custom-color-label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; display: block; }
+.custom-color-row { display: flex; align-items: center; gap: 10px; }
+.custom-color-input { width: 44px; height: 44px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; padding: 2px; background: var(--bg-secondary); }
+.custom-color-input::-webkit-color-swatch-wrapper { padding: 0; }
+.custom-color-input::-webkit-color-swatch { border: none; border-radius: 6px; }
+.custom-color-hex { font-size: 0.9rem; font-weight: 600; color: var(--text); font-family: monospace; min-width: 70px; }
+.custom-color-apply { padding: 10px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.custom-color-apply:active { background: var(--primary-dark); transform: scale(0.96); }
 .settings-github-status { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px; padding: 8px 12px; background: var(--bg-secondary); border-radius: 8px; }
 .settings-github-status.configured { color: #2e7d32; background: #e8f5e9; }
 .settings-btns { display: flex; flex-direction: column; gap: 10px; }

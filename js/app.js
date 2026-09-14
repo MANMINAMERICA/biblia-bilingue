@@ -305,24 +305,92 @@ function goHome() {
 
 // Color Theme
 function setColorTheme(color) {
+    if (color === 'custom') return;
+    document.documentElement.removeAttribute('data-color');
     document.documentElement.setAttribute('data-color', color);
     localStorage.setItem('color_theme', color);
+    localStorage.removeItem('custom_color');
     document.querySelectorAll('.color-theme-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.color === color);
     });
-    // Update manifest theme-color
+    document.getElementById('custom-color-section').classList.add('hidden');
     const styles = getComputedStyle(document.documentElement);
     const primary = styles.getPropertyValue('--primary').trim();
     document.querySelector('meta[name="theme-color"]').setAttribute('content', primary);
 }
 
+function openColorPicker() {
+    document.querySelectorAll('.color-theme-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector('.color-theme-btn[data-color="custom"]').classList.add('active');
+    document.getElementById('custom-color-section').classList.toggle('hidden');
+}
+
+function applyCustomColor() {
+    const hex = document.getElementById('custom-color-input').value;
+    document.documentElement.setAttribute('data-color', 'custom');
+    document.documentElement.style.setProperty('--primary', hex);
+    document.documentElement.style.setProperty('--primary-light', lightenColor(hex, 30));
+    document.documentElement.style.setProperty('--primary-dark', darkenColor(hex, 20));
+    document.documentElement.style.setProperty('--text-verse-es', darkenColor(hex, 40));
+    localStorage.setItem('color_theme', 'custom');
+    localStorage.setItem('custom_color', hex);
+    document.querySelectorAll('.color-theme-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector('.color-theme-btn[data-color="custom"]').classList.add('active');
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', hex);
+}
+
+function lightenColor(hex, percent) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = Math.min(255, (num >> 16) + Math.round(255 * percent / 100));
+    const g = Math.min(255, ((num >> 8) & 0x00FF) + Math.round(255 * percent / 100));
+    const b = Math.min(255, (num & 0x0000FF) + Math.round(255 * percent / 100));
+    return '#' + (b | (g << 8) | (r << 16)).toString(16).padStart(6, '0');
+}
+
+function darkenColor(hex, percent) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = Math.max(0, (num >> 16) - Math.round(255 * percent / 100));
+    const g = Math.max(0, ((num >> 8) & 0x00FF) - Math.round(255 * percent / 100));
+    const b = Math.max(0, (num & 0x0000FF) - Math.round(255 * percent / 100));
+    return '#' + (b | (g << 8) | (r << 16)).toString(16).padStart(6, '0');
+}
+
 function loadColorTheme() {
     const saved = localStorage.getItem('color_theme') || 'blue';
-    document.documentElement.setAttribute('data-color', saved);
+    if (saved === 'custom') {
+        const hex = localStorage.getItem('custom_color');
+        if (hex) {
+            document.documentElement.setAttribute('data-color', 'custom');
+            document.documentElement.style.setProperty('--primary', hex);
+            document.documentElement.style.setProperty('--primary-light', lightenColor(hex, 30));
+            document.documentElement.style.setProperty('--primary-dark', darkenColor(hex, 20));
+            document.documentElement.style.setProperty('--text-verse-es', darkenColor(hex, 40));
+            document.getElementById('custom-color-input').value = hex;
+            document.getElementById('custom-color-hex').textContent = hex;
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', hex);
+        }
+    } else {
+        document.documentElement.setAttribute('data-color', saved);
+    }
     document.querySelectorAll('.color-theme-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.color === saved);
     });
+    // Update custom swatch color
+    const customHex = localStorage.getItem('custom_color') || '#0D6CFF';
+    document.getElementById('custom-swatch').style.background = customHex;
+    document.getElementById('custom-color-input').value = customHex;
+    document.getElementById('custom-color-hex').textContent = customHex;
 }
+
+// Update hex display on color input change
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('custom-color-input');
+    if (input) {
+        input.addEventListener('input', () => {
+            document.getElementById('custom-color-hex').textContent = input.value;
+        });
+    }
+});
 
 // Books
 function showBooksView(pushState = true) {
