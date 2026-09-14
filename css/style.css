@@ -268,12 +268,12 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 
 /* Reading View */
 .reading-header { display: flex; align-items: center; gap: 10px; padding: 10px 0; margin-bottom: 8px; border-bottom: 1px solid var(--border); position: sticky; top: 96px; background: var(--bg); z-index: 50; }
-.reading-header-title { font-size: 1rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
-.reading-nav { display: flex; gap: 4px; margin-left: auto; }
+.reading-header-title { font-size: 1rem; font-weight: 700; color: var(--primary); white-space: nowrap; flex-shrink: 0; }
+.reading-nav { display: flex; gap: 4px; margin-left: auto; flex-shrink: 0; }
 .reading-nav button { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.15s; font-size: 0.9rem; }
 .reading-nav button:active { background: var(--primary); color: white; }
 .reading-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
-.verse-jump-mini { display: flex; align-items: center; gap: 4px; }
+.verse-jump-mini { display: flex; align-items: center; gap: 4px; flex: 1; justify-content: center; }
 .verse-jump-mini label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
 .verse-jump-mini input { width: 44px; padding: 5px 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; text-align: center; background: var(--bg); color: var(--text); outline: none; }
 .verse-jump-mini input:focus { border-color: var(--primary); }
