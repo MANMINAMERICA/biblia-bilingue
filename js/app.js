@@ -150,11 +150,18 @@ function showView(view, pushState = true) {
     const titleEl = document.getElementById('header-title');
     const scrollBtns = document.getElementById('scroll-buttons');
 
-    // Show/hide floating scroll buttons
+    // Show/hide floating buttons
+    const scrollBtns = document.getElementById('scroll-buttons');
+    const homeBtn = document.getElementById('floating-home');
     if (view === 'reading') {
         scrollBtns.classList.remove('hidden');
+        homeBtn.classList.remove('hidden');
+    } else if (view === 'chapters' || view === 'books') {
+        scrollBtns.classList.add('hidden');
+        homeBtn.classList.remove('hidden');
     } else {
         scrollBtns.classList.add('hidden');
+        homeBtn.classList.add('hidden');
     }
 
     if (view === 'home') {
@@ -234,6 +241,11 @@ history.pushState({ view: 'home' }, '', '');
 // Scroll buttons
 function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 function scrollToBottom() { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }
+function goHome() {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    currentBook = null;
+    showView('home');
+}
 
 // Books
 function showBooksView(pushState = true) {
