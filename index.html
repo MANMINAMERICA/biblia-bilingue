@@ -175,6 +175,32 @@
                 <h2 class="section-title">Configuración</h2>
 
                 <div class="settings-section">
+                    <h3 class="settings-subtitle">Tema de color</h3>
+                    <div class="color-theme-grid" id="color-theme-grid">
+                        <button class="color-theme-btn active" data-color="blue" onclick="setColorTheme('blue')">
+                            <span class="color-swatch" style="background: #0D6CFF"></span>
+                            <span>Azul</span>
+                        </button>
+                        <button class="color-theme-btn" data-color="green" onclick="setColorTheme('green')">
+                            <span class="color-swatch" style="background: #2E7D32"></span>
+                            <span>Verde</span>
+                        </button>
+                        <button class="color-theme-btn" data-color="purple" onclick="setColorTheme('purple')">
+                            <span class="color-swatch" style="background: #6A1B9A"></span>
+                            <span>Púrpura</span>
+                        </button>
+                        <button class="color-theme-btn" data-color="red" onclick="setColorTheme('red')">
+                            <span class="color-swatch" style="background: #C62828"></span>
+                            <span>Rojo</span>
+                        </button>
+                        <button class="color-theme-btn" data-color="orange" onclick="setColorTheme('orange')">
+                            <span class="color-swatch" style="background: #E65100"></span>
+                            <span>Naranja</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
                     <h3 class="settings-subtitle">Tamaño de fuente</h3>
                     <div class="font-size-control">
                         <button class="font-size-btn" onclick="changeFontSize(-1)">A-</button>
@@ -231,18 +257,16 @@
             </div>
         </main>
 
-        <!-- Floating Scroll Buttons -->
-        <div id="scroll-buttons" class="scroll-buttons hidden">
-            <button class="scroll-btn" onclick="scrollToTop()" title="Arriba">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="18 15 12 9 6 15"/>
-                </svg>
-            </button>
-            <button class="scroll-btn" onclick="scrollToBottom()" title="Abajo">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <!-- Scroll Scrubber -->
+        <div id="scroll-scrubber" class="scroll-scrubber">
+            <div class="scroll-scrubber-track"></div>
+            <div class="scroll-scrubber-fill" id="scroll-scrubber-fill"></div>
+            <div class="scroll-scrubber-thumb" id="scroll-scrubber-thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="6 9 12 15 18 9"/>
                 </svg>
-            </button>
+            </div>
+            <div class="scroll-scrubber-label" id="scroll-scrubber-label">1 / 1</div>
         </div>
 
         <!-- Floating Home Button -->
