@@ -243,9 +243,6 @@ function initScrubber() {
     const thumb = document.getElementById('scroll-scrubber-thumb');
     const scrubber = document.getElementById('scroll-scrubber');
     const label = document.getElementById('scroll-scrubber-label');
-    const btnUp = document.getElementById('scroll-scrubber-up');
-    const btnDown = document.getElementById('scroll-scrubber-down');
-    const trackHeight = () => scrubber.offsetHeight - 80;
     let isDragging = false;
     let startY = 0;
     let startScroll = 0;
@@ -254,8 +251,8 @@ function initScrubber() {
         const totalHeight = document.body.scrollHeight - window.innerHeight;
         if (totalHeight <= 0) return;
         const progress = window.scrollY / totalHeight;
-        const th = trackHeight();
-        const thumbTop = 40 + progress * th;
+        const trackHeight = scrubber.offsetHeight;
+        const thumbTop = progress * trackHeight;
         thumb.style.top = thumbTop + 'px';
         const verses = document.querySelectorAll('.verse-pair');
         if (verses.length > 0) {
@@ -276,10 +273,10 @@ function initScrubber() {
     function onMove(e) {
         if (!isDragging) return;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        const th = trackHeight();
+        const trackHeight = scrubber.offsetHeight;
         const totalHeight = document.body.scrollHeight - window.innerHeight;
         const dy = clientY - startY;
-        const dScroll = (dy / th) * totalHeight;
+        const dScroll = (dy / trackHeight) * totalHeight;
         window.scrollTo(0, startScroll + dScroll);
         e.preventDefault();
     }
@@ -295,9 +292,6 @@ function initScrubber() {
     document.addEventListener('touchmove', onMove, { passive: false });
     document.addEventListener('mouseup', onEnd);
     document.addEventListener('touchend', onEnd);
-
-    btnUp.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-    btnDown.addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
 
     window.addEventListener('scroll', updateScrubber);
     updateScrubber();
