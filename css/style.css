@@ -289,7 +289,7 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .scroll-btn:active { transform: scale(0.9); background: var(--primary-dark); }
 
 /* Floating Home Button */
-.floating-home { position: fixed; right: 16px; bottom: 140px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--primary); color: white; border: none; border-radius: 50%; box-shadow: 0 4px 16px rgba(0,0,0,0.3); cursor: pointer; z-index: 150; transition: all 0.2s; }
+.floating-home { position: fixed; right: 16px; bottom: 16px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--primary); color: white; border: none; border-radius: 50%; box-shadow: 0 4px 16px rgba(0,0,0,0.3); cursor: pointer; z-index: 150; transition: all 0.2s; }
 .floating-home:active { transform: scale(0.9); background: var(--primary-dark); }
 
 /* Search Results */
