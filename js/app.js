@@ -242,8 +242,10 @@ history.pushState({ view: 'home' }, '', '');
 function initScrubber() {
     const thumb = document.getElementById('scroll-scrubber-thumb');
     const scrubber = document.getElementById('scroll-scrubber');
-    const fill = document.getElementById('scroll-scrubber-fill');
     const label = document.getElementById('scroll-scrubber-label');
+    const btnUp = document.getElementById('scroll-scrubber-up');
+    const btnDown = document.getElementById('scroll-scrubber-down');
+    const trackHeight = () => scrubber.offsetHeight - 80; // minus up/down buttons + padding
     let isDragging = false;
     let startY = 0;
     let startScroll = 0;
@@ -252,10 +254,9 @@ function initScrubber() {
         const totalHeight = document.body.scrollHeight - window.innerHeight;
         if (totalHeight <= 0) return;
         const progress = window.scrollY / totalHeight;
-        const trackHeight = scrubber.offsetHeight - 32;
-        const thumbTop = progress * trackHeight;
+        const th = trackHeight();
+        const thumbTop = 40 + progress * th; // 40px offset for top button
         thumb.style.top = thumbTop + 'px';
-        fill.style.height = (thumbTop + 16) + 'px';
         const verses = document.querySelectorAll('.verse-pair');
         if (verses.length > 0) {
             let current = 1;
@@ -275,10 +276,10 @@ function initScrubber() {
     function onMove(e) {
         if (!isDragging) return;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        const trackHeight = scrubber.offsetHeight - 32;
+        const th = trackHeight();
         const totalHeight = document.body.scrollHeight - window.innerHeight;
         const dy = clientY - startY;
-        const dScroll = (dy / trackHeight) * totalHeight;
+        const dScroll = (dy / th) * totalHeight;
         window.scrollTo(0, startScroll + dScroll);
         e.preventDefault();
     }
@@ -294,6 +295,10 @@ function initScrubber() {
     document.addEventListener('touchmove', onMove, { passive: false });
     document.addEventListener('mouseup', onEnd);
     document.addEventListener('touchend', onEnd);
+
+    // Arrow buttons
+    btnUp.addEventListener('click', () => window.scrollBy({ top: -window.innerHeight * 0.3, behavior: 'smooth' }));
+    btnDown.addEventListener('click', () => window.scrollBy({ top: window.innerHeight * 0.3, behavior: 'smooth' }));
 
     window.addEventListener('scroll', updateScrubber);
     updateScrubber();
