@@ -296,9 +296,9 @@ function initScrubber() {
     document.addEventListener('mouseup', onEnd);
     document.addEventListener('touchend', onEnd);
 
-    // Arrow buttons
-    btnUp.addEventListener('click', () => window.scrollBy({ top: -window.innerHeight * 0.3, behavior: 'smooth' }));
-    btnDown.addEventListener('click', () => window.scrollBy({ top: window.innerHeight * 0.3, behavior: 'smooth' }));
+    // Arrow buttons - go to top/bottom
+    btnUp.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    btnDown.addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
 
     window.addEventListener('scroll', updateScrubber);
     updateScrubber();
