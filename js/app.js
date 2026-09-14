@@ -73,7 +73,6 @@ async function init() {
         document.getElementById('loading-screen').classList.add('hidden');
         document.getElementById('app').classList.remove('hidden');
         updateGitHubStatus();
-        initScrubber();
     }, 500);
     loadTheme();
     loadColorTheme();
@@ -151,16 +150,16 @@ function showView(view, pushState = true) {
     const backBtn = document.getElementById('btn-back');
     const titleEl = document.getElementById('header-title');
 
-    const scrubber = document.getElementById('scroll-scrubber');
+    const scrollBtns = document.getElementById('scroll-buttons');
     const homeBtn = document.getElementById('floating-home');
     if (view === 'reading') {
-        scrubber.classList.add('visible');
+        scrollBtns.classList.remove('hidden');
         homeBtn.classList.remove('hidden');
     } else if (view === 'chapters' || view === 'books') {
-        scrubber.classList.remove('visible');
+        scrollBtns.classList.add('hidden');
         homeBtn.classList.remove('hidden');
     } else {
-        scrubber.classList.remove('visible');
+        scrollBtns.classList.add('hidden');
         homeBtn.classList.add('hidden');
     }
 
@@ -238,71 +237,9 @@ window.addEventListener('popstate', () => {
 
 history.pushState({ view: 'home' }, '', '');
 
-// Scroll Scrubber
-function initScrubber() {
-    const thumb = document.getElementById('scroll-scrubber-thumb');
-    const scrubber = document.getElementById('scroll-scrubber');
-    const label = document.getElementById('scroll-scrubber-label');
-    const btnUp = document.getElementById('scroll-scrubber-up');
-    const btnDown = document.getElementById('scroll-scrubber-down');
-    const trackHeight = () => scrubber.offsetHeight - 80; // minus up/down buttons + padding
-    let isDragging = false;
-    let startY = 0;
-    let startScroll = 0;
-
-    function updateScrubber() {
-        const totalHeight = document.body.scrollHeight - window.innerHeight;
-        if (totalHeight <= 0) return;
-        const progress = window.scrollY / totalHeight;
-        const th = trackHeight();
-        const thumbTop = 40 + progress * th; // 40px offset for top button
-        thumb.style.top = thumbTop + 'px';
-        const verses = document.querySelectorAll('.verse-pair');
-        if (verses.length > 0) {
-            let current = 1;
-            verses.forEach((v, i) => { if (v.getBoundingClientRect().top < window.innerHeight / 2) current = i + 1; });
-            label.textContent = current + ' / ' + verses.length;
-        }
-    }
-
-    function onStart(e) {
-        isDragging = true;
-        startY = e.touches ? e.touches[0].clientY : e.clientY;
-        startScroll = window.scrollY;
-        thumb.classList.add('dragging');
-        e.preventDefault();
-    }
-
-    function onMove(e) {
-        if (!isDragging) return;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        const th = trackHeight();
-        const totalHeight = document.body.scrollHeight - window.innerHeight;
-        const dy = clientY - startY;
-        const dScroll = (dy / th) * totalHeight;
-        window.scrollTo(0, startScroll + dScroll);
-        e.preventDefault();
-    }
-
-    function onEnd() {
-        isDragging = false;
-        thumb.classList.remove('dragging');
-    }
-
-    thumb.addEventListener('mousedown', onStart);
-    thumb.addEventListener('touchstart', onStart, { passive: false });
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('mouseup', onEnd);
-    document.addEventListener('touchend', onEnd);
-
-    // Arrow buttons - go to top/bottom
-    btnUp.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-    btnDown.addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
-
-    window.addEventListener('scroll', updateScrubber);
-    updateScrubber();
-}
+// Scroll buttons
+function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function scrollToBottom() { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }
 
 function goHome() {
     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));

@@ -257,21 +257,18 @@
             </div>
         </main>
 
-        <!-- Scroll Scrubber -->
-        <div id="scroll-scrubber" class="scroll-scrubber">
-            <div class="scroll-scrubber-track"></div>
-            <button class="scroll-scrubber-up" id="scroll-scrubber-up">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <!-- Floating Scroll Buttons -->
+        <div id="scroll-buttons" class="scroll-buttons hidden">
+            <button class="scroll-btn" onclick="scrollToTop()" title="Arriba">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="18 15 12 9 6 15"/>
                 </svg>
             </button>
-            <div class="scroll-scrubber-thumb" id="scroll-scrubber-thumb"></div>
-            <button class="scroll-scrubber-down" id="scroll-scrubber-down">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <button class="scroll-btn" onclick="scrollToBottom()" title="Abajo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="6 9 12 15 18 9"/>
                 </svg>
             </button>
-            <div class="scroll-scrubber-label" id="scroll-scrubber-label">1 / 1</div>
         </div>
 
         <!-- Floating Home Button -->
