@@ -148,9 +148,7 @@ function showView(view, pushState = true) {
 
     const backBtn = document.getElementById('btn-back');
     const titleEl = document.getElementById('header-title');
-    const scrollBtns = document.getElementById('scroll-buttons');
 
-    // Show/hide floating buttons
     const scrollBtns = document.getElementById('scroll-buttons');
     const homeBtn = document.getElementById('floating-home');
     if (view === 'reading') {
