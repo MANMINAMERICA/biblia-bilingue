@@ -1,20 +1,19 @@
-const CACHE_NAME = 'biblia-bilingue-v22';
+const CACHE_NAME = 'biblia-bilingue-v23';
 const BASE = self.location.pathname.replace(/\/[^/]*$/, '/');
-const ASSETS = [
+const SHELL = [
     '',
     'index.html',
     'css/style.css',
     'js/app.js',
     'manifest.json',
     'icons/icon-192.png',
-    'icons/icon-512.png',
-    'data/bible-combined.json'
+    'icons/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll(ASSETS.map(a => new URL(a, BASE).href));
+            return cache.addAll(SHELL.map(a => new URL(a, BASE).href));
         }).then(() => self.skipWaiting())
     );
 });
