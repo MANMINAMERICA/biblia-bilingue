@@ -140,20 +140,19 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .header-actions { display: flex; gap: 4px; }
 
 .icon-btn {
-    width: 36px;
-    height: 36px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    cursor: pointer;
-    transition: all 0.15s;
+    transition: background 0.2s;
 }
 
-.icon-btn:active { background: var(--primary); color: white; }
+.icon-btn:active { background: rgba(255,255,255,0.2); }
 
 /* Tab Bar */
 .tab-bar {
