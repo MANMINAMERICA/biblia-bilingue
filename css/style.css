@@ -96,7 +96,7 @@ body {
     color: var(--text);
     font-size: var(--font-size-base);
     line-height: 1.5;
-    overflow-x: hidden;
+    overflow-x: clip;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -160,7 +160,7 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
     background: var(--bg-card);
     border-bottom: 2px solid var(--border);
     position: sticky;
-    top: 56px;
+    top: var(--header-h, 56px);
     z-index: 90;
 }
 
@@ -258,7 +258,11 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 /* Books Grid */
 .section-title { font-size: 1.2rem; color: var(--primary); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
 .section-title.no-border { border-bottom: none; padding-bottom: 0; margin-bottom: 8px; }
-.books-grid { display: grid; grid-template-columns: 1fr; gap: 4px; }
+.books-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.books-grid .home-book-item { padding: 8px; gap: 6px; }
+.books-grid .home-book-num { width: 24px; height: 24px; font-size: 0.65rem; }
+.books-grid .home-book-name { font-size: 0.85rem; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.books-grid .home-book-arrow { font-size: 0.7rem; flex-shrink: 0; }
 
 /* Chapters Grid */
 .chapters-view-title { font-size: 1.3rem; font-weight: 700; color: var(--text); padding: 16px 0 12px; }
@@ -267,7 +271,7 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .chapter-btn:active { background: var(--primary); color: white; border-color: var(--primary); }
 
 /* Reading View */
-.reading-header { display: flex; align-items: center; gap: 10px; padding: 10px 0; margin-bottom: 8px; border-bottom: 1px solid var(--border); position: sticky; top: 96px; background: var(--bg); z-index: 50; }
+.reading-header { display: flex; align-items: center; gap: 10px; padding: 10px 0; margin-bottom: 8px; border-bottom: 1px solid var(--border); position: sticky; top: var(--stack-h, 104px); background: var(--bg); z-index: 50; }
 .reading-header-title { font-size: 1rem; font-weight: 700; color: var(--primary); white-space: nowrap; flex-shrink: 0; }
 .reading-nav { display: flex; gap: 4px; margin-left: auto; flex-shrink: 0; }
 .reading-nav button { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.15s; font-size: 0.9rem; }
@@ -439,7 +443,7 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 
 /* Hide Netlify banner */
 [data-nf-variant], [data-netlify], iframe[src*="netlify"], .netlify-badge { display: none !important; }
-html, body { padding-bottom: 0; overflow-x: hidden; }
+html, body { padding-bottom: 0; overflow-x: clip; }
 
 /* Font Size Classes */
 .font-small { --font-size-base: 14px; --font-size-verse: 0.9rem; }
@@ -457,7 +461,7 @@ html, body { padding-bottom: 0; overflow-x: hidden; }
 
 /* Mobile optimizations */
 @media (min-width: 600px) {
-    .books-grid { grid-template-columns: repeat(2, 1fr); }
+    .books-grid { grid-template-columns: repeat(3, 1fr); }
     .chapters-grid { grid-template-columns: repeat(10, 1fr); }
 }
 @media (min-width: 900px) {

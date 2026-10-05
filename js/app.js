@@ -74,6 +74,7 @@ async function init() {
         document.getElementById('app').classList.remove('hidden');
         updateGitHubStatus();
         initScrubber();
+        updateStickyOffsets();
     }, 500);
     loadTheme();
     loadColorTheme();
@@ -135,6 +136,19 @@ function tabAction(action) {
         document.querySelectorAll('.tab-item')[2].classList.add('active');
         showThemesView();
     }
+}
+
+// Sticky offsets: header + tab bar heights for the sticky reading toolbar
+function updateStickyOffsets() {
+    const header = document.getElementById('header');
+    const tabs = document.getElementById('tab-bar');
+    if (!header || !tabs) return;
+    const hh = header.offsetHeight;
+    const th = tabs.offsetHeight;
+    if (!hh || !th) return;
+    const root = document.documentElement;
+    root.style.setProperty('--header-h', hh + 'px');
+    root.style.setProperty('--stack-h', (hh + th) + 'px');
 }
 
 function openSettings() {
@@ -405,6 +419,7 @@ function showBooksView(pushState = true) {
         item.className = 'home-book-item';
         item.onclick = () => openBook(bookData);
         item.innerHTML = `<div class="home-book-num">${index + 1}</div><div class="home-book-name">${displayName}</div><div class="home-book-arrow">&#9654;</div>`;
+        item.title = displayName;
         container.appendChild(item);
     });
     showView('books', pushState);
@@ -987,5 +1002,8 @@ function handleImportFile(event) {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
 }
+
+window.addEventListener('resize', updateStickyOffsets);
+window.addEventListener('orientationchange', updateStickyOffsets);
 
 init();
