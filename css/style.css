@@ -341,7 +341,7 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .scroll-buttons { display: none; }
 
 /* Scroll Scrubber */
-.scroll-scrubber { position: fixed; right: 10px; top: 25%; height: 50%; width: 36px; z-index: 150; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.scroll-scrubber { position: fixed; right: 10px; top: max(25%, calc(var(--stack-h, 104px) + 92px)); bottom: 25%; height: auto; width: 36px; z-index: 150; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
 .scroll-scrubber.visible { opacity: 1; pointer-events: auto; }
 .scroll-scrubber-track { position: absolute; left: 50%; transform: translateX(-50%); width: 3px; height: 100%; background: rgba(0,0,0,0.08); border-radius: 2px; }
 .scroll-scrubber-thumb { position: absolute; left: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; background: rgba(0,0,0,0.15); border-radius: 50%; box-shadow: 0 1px 4px rgba(0,0,0,0.15); cursor: grab; touch-action: none; transition: width 0.15s, height 0.15s, box-shadow 0.15s, background 0.15s; z-index: 2; }
