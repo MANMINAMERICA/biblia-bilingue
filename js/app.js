@@ -835,16 +835,29 @@ function showSettingsView(pushState = true) { updateGitHubStatus(); showView('se
 function homeSearch() {
     const input = document.getElementById('home-search-input');
     const query = input.value.trim();
+    hideHomeSearchMsg();
     if (!query) return;
     const ref = parseReference(query);
     if (ref) { navigateToReference(ref); return; }
     performTextSearch(query);
 }
 
+function showHomeSearchMsg(msg) {
+    const el = document.getElementById('home-search-msg');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.remove('hidden');
+}
+
+function hideHomeSearchMsg() {
+    const el = document.getElementById('home-search-msg');
+    if (el) el.classList.add('hidden');
+}
+
 function navigateToReference(ref) {
     const book = bibleData.find(b => b.book === ref.book);
-    if (!book) { alert('Libro no encontrado: ' + ref.book); return; }
-    if (!book.chapters.find(c => c.chapter === ref.chapter)) { alert('Capítulo no encontrado'); return; }
+    if (!book) { showHomeSearchMsg('No se encontró el libro "' + ref.book + '". Intenta con otro término.'); return; }
+    if (!book.chapters.find(c => c.chapter === ref.chapter)) { showHomeSearchMsg(`No se encontró ${ref.book} ${ref.chapter}. Intenta con otro término.`); return; }
     currentBook = book;
     if (ref.verseFrom) {
         openChapter(ref.chapter);
@@ -857,7 +870,7 @@ function navigateToReference(ref) {
 
 function performTextSearch(query) {
     const q = normalizeText(query);
-    if (q.length < 2) return;
+    if (q.length < 2) { showHomeSearchMsg('Escribe al menos 2 letras para buscar.'); return; }
     const results = [];
     for (const book of bibleData) {
         for (const ch of book.chapters) {
@@ -871,21 +884,23 @@ function performTextSearch(query) {
         }
         if (results.length >= 100) break;
     }
+    if (results.length === 0) {
+        showHomeSearchMsg(`No se encontraron resultados para "${query}". Intenta con otro término.`);
+        return;
+    }
+    hideHomeSearchMsg();
     const container = document.getElementById('search-results');
     const header = document.getElementById('search-results-header');
-    if (results.length === 0) { header.innerHTML = ''; container.innerHTML = `<div class="no-results">No se encontraron resultados para "${query}"</div>`; }
-    else {
-        header.innerHTML = `<div class="search-count">${results.length} resultado(s)</div><button class="copy-results-btn" onclick="copySearchResults()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar todo</button>`;
-        let html = '';
-        results.forEach(r => {
-            const text = r.matchEs ? r.es : r.ko;
-            const highlighted = text.replace(new RegExp(`(${escapeRegex(query)})`, 'gi'), '<mark>$1</mark>');
-            html += `<div class="search-result-item" onclick="goToVerse('${r.book}',${r.chapter},${r.verse})"><div class="search-result-ref">${r.book} ${r.chapter}:${r.verse}</div><div class="search-result-text">${highlighted}</div></div>`;
-        });
-        container.innerHTML = html;
-        window._lastSearchResults = results;
-        window._lastSearchQuery = query;
-    }
+    header.innerHTML = `<div class="search-count">${results.length} resultado(s)</div><button class="copy-results-btn" onclick="copySearchResults()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar todo</button>`;
+    let html = '';
+    results.forEach(r => {
+        const text = r.matchEs ? r.es : r.ko;
+        const highlighted = text.replace(new RegExp(`(${escapeRegex(query)})`, 'gi'), '<mark>$1</mark>');
+        html += `<div class="search-result-item" onclick="goToVerse('${r.book}',${r.chapter},${r.verse})"><div class="search-result-ref">${r.book} ${r.chapter}:${r.verse}</div><div class="search-result-text">${highlighted}</div></div>`;
+    });
+    container.innerHTML = html;
+    window._lastSearchResults = results;
+    window._lastSearchQuery = query;
     showView('search');
 }
 
@@ -912,8 +927,8 @@ function copySearchResults() {
     showToast('Resultados copiados');
 }
 
-function clearHomeSearch() { document.getElementById('home-search-input').value = ''; document.getElementById('home-clear-btn').classList.add('hidden'); }
-function toggleClearBtn() { const val = document.getElementById('home-search-input').value; document.getElementById('home-clear-btn').classList.toggle('hidden', !val); }
+function clearHomeSearch() { document.getElementById('home-search-input').value = ''; document.getElementById('home-clear-btn').classList.add('hidden'); hideHomeSearchMsg(); }
+function toggleClearBtn() { const val = document.getElementById('home-search-input').value; document.getElementById('home-clear-btn').classList.toggle('hidden', !val); hideHomeSearchMsg(); }
 
 // Book abbreviations
 const BOOK_ALIASES = {
