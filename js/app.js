@@ -578,14 +578,10 @@ function clearSelection() {
 
 function copySelectedVerses() {
     if (selectedVerses.size === 0) return;
-    const sorted = [...selectedVerses].map(Number).sort((a, b) => a - b);
-    const from = sorted[0], to = sorted[sorted.length - 1];
-    let ref = `${currentBook.book} ${currentChapter}:${from}`;
-    if (from !== to) ref += `-${to}`;
-    let text = ref + '\n\n';
+    let text = '';
     document.querySelectorAll('.verse-pair').forEach(p => {
         if (selectedVerses.has(p.dataset.verse)) {
-            text += `${p.dataset.ko}\n${p.dataset.es}\n\n`;
+            text += `${currentBook.book} ${currentChapter}:${p.dataset.verse}\n${p.dataset.ko}\n${p.dataset.es}\n\n`;
         }
     });
     copyToClipboard(text.trim());
