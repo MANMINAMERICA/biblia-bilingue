@@ -1,7 +1,7 @@
 {
     "name": "Biblia Bilingüe Español-Coreano",
     "short_name": "Biblia Bilingüe",
-    "description": "Biblia completa bilingüe: Reina Valera 1960 (Español) y 개역한글 (Coreano)",
+    "description": "Biblia completa bilingüe: Reina Valera 1960 (Español) y 한글판 개역성경 (Coreano)",
     "start_url": ".",
     "scope": ".",
     "display": "standalone",
