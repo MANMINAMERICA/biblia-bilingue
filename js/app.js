@@ -72,6 +72,7 @@ async function init() {
     setTimeout(() => {
         document.getElementById('loading-screen').classList.add('hidden');
         document.getElementById('app').classList.remove('hidden');
+        restoreAppState();
         updateGitHubStatus();
         initScrubber();
         updateStickyOffsets();
@@ -203,7 +204,8 @@ function showView(view, pushState = true) {
 
     currentView = view;
     window.scrollTo(0, 0);
-    if (pushState) history.pushState({ view }, '', '');
+    saveAppState();
+    if (pushState && !isRestoring) history.pushState({ view, book: currentBook ? currentBook.book : null, chapter: currentChapter }, '', '');
 }
 
 function goBack() {
@@ -251,6 +253,73 @@ window.addEventListener('popstate', () => {
 });
 
 history.pushState({ view: 'home' }, '', '');
+history.scrollRestoration = 'manual';
+
+// Prevent pull-to-refresh: block downward pull at the top of the page
+let pullStartY = 0;
+document.addEventListener('touchstart', (e) => { if (e.touches.length === 1) pullStartY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchmove', (e) => {
+    if (e.cancelable && e.touches.length === 1 && window.scrollY <= 0 && e.touches[0].clientY > pullStartY) e.preventDefault();
+}, { passive: false });
+
+// Save/restore navigation state across reloads
+let isRestoring = false;
+let lastStateSave = 0;
+
+function saveAppState() {
+    try {
+        sessionStorage.setItem('app_state', JSON.stringify({
+            view: currentView,
+            book: currentBook ? currentBook.book : null,
+            chapter: currentChapter,
+            testament: currentTestament,
+            scrollY: currentView === 'reading' ? Math.round(window.scrollY) : 0
+        }));
+    } catch (e) {}
+}
+
+window.addEventListener('scroll', () => {
+    if (currentView !== 'reading') return;
+    const now = Date.now();
+    if (now - lastStateSave < 400) return;
+    lastStateSave = now;
+    saveAppState();
+});
+window.addEventListener('pagehide', saveAppState);
+
+function restoreAppState() {
+    let st = null;
+    try { st = JSON.parse(sessionStorage.getItem('app_state')); } catch (e) {}
+    if (!st || ['books', 'chapters', 'reading'].indexOf(st.view) === -1) return;
+    const tabIdx = st.testament === 'new' ? 1 : 0;
+    document.querySelectorAll('.tab-item').forEach((t, i) => t.classList.toggle('active', i === tabIdx));
+    if (st.view === 'books') {
+        currentTestament = st.testament === 'new' ? 'new' : 'old';
+        isRestoring = true;
+        showBooksView();
+        isRestoring = false;
+        return;
+    }
+    if (!st.book) return;
+    const bk = bibleData.find(b => b.book === st.book);
+    if (!bk) return;
+    if (st.testament) currentTestament = st.testament;
+    currentBook = bk;
+    isRestoring = true;
+    if (st.view === 'reading' && st.chapter) {
+        openChapter(st.chapter);
+        const y = st.scrollY || 0;
+        if (y > 0) {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                window.scrollTo(0, y);
+                saveAppState();
+            }));
+        }
+    } else {
+        openBook(bk);
+    }
+    setTimeout(() => { isRestoring = false; }, 500);
+}
 
 // Scroll Scrubber
 function initScrubber() {
