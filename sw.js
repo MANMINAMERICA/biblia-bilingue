@@ -1,4 +1,4 @@
-const CACHE_NAME = 'biblia-bilingue-v44';
+const CACHE_NAME = 'biblia-bilingue-v45';
 const BASE = self.location.pathname.replace(/\/[^/]*$/, '/');
 const SHELL = [
     '',

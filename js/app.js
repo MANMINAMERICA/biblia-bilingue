@@ -489,13 +489,43 @@ function openChapter(chapterNum) {
             verseHTML = `<div class="verse-es"><span class="verse-number">${v.verse}</span><span>${v.es}</span></div>`;
         }
         pair.innerHTML = verseHTML;
-        let lastTap = 0;
-        pair.addEventListener('touchend', (e) => {
-            const now = Date.now();
-            if (now - lastTap < 300) { e.preventDefault(); toggleVerseSelection(pair); if (navigator.vibrate) navigator.vibrate(30); }
-            lastTap = now;
+        let lpTimer = null, lpStartX = 0, lpStartY = 0, lpFired = false, lpFiredAt = 0;
+        const lpBegin = (x, y) => {
+            lpFired = false;
+            lpStartX = x; lpStartY = y;
+            clearTimeout(lpTimer);
+            lpTimer = setTimeout(() => {
+                lpTimer = null;
+                lpFired = true;
+                lpFiredAt = Date.now();
+                toggleVerseSelection(pair);
+                if (navigator.vibrate) navigator.vibrate(40);
+            }, 500);
+        };
+        const lpMove = (x, y) => {
+            if (!lpTimer) return;
+            if (Math.abs(x - lpStartX) > 10 || Math.abs(y - lpStartY) > 10) lpCancel();
+        };
+        const lpCancel = () => { clearTimeout(lpTimer); lpTimer = null; };
+        const lpEnd = (e) => {
+            clearTimeout(lpTimer); lpTimer = null;
+            if (lpFired && e && e.cancelable) e.preventDefault();
+        };
+        pair.addEventListener('touchstart', (e) => { const t = e.touches[0]; lpBegin(t.clientX, t.clientY); }, { passive: true });
+        pair.addEventListener('touchmove', (e) => { const t = e.touches[0]; lpMove(t.clientX, t.clientY); }, { passive: true });
+        pair.addEventListener('touchend', lpEnd, { passive: false });
+        pair.addEventListener('touchcancel', lpCancel);
+        pair.addEventListener('mousedown', (e) => { lpBegin(e.clientX, e.clientY); });
+        pair.addEventListener('mousemove', (e) => { lpMove(e.clientX, e.clientY); });
+        pair.addEventListener('mouseup', lpEnd);
+        pair.addEventListener('mouseleave', lpCancel);
+        pair.addEventListener('click', () => {
+            if (lpFired) {
+                lpFired = false;
+                if (Date.now() - lpFiredAt < 700) return;
+            }
+            if (selectedVerses.size > 0) toggleVerseSelection(pair);
         });
-        pair.addEventListener('click', () => { if (selectedVerses.size > 0) toggleVerseSelection(pair); });
         container.appendChild(pair);
     });
     document.getElementById('btn-prev-chapter').disabled = chapterNum <= 1;
@@ -515,6 +545,11 @@ function jumpToVerse() {
     const verseEl = document.querySelectorAll('.verse-pair')[verseNum - 1];
     if (verseEl) { verseEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); verseEl.classList.add('verse-highlight'); setTimeout(() => verseEl.classList.remove('verse-highlight'), 2000); }
 }
+
+// Block native context menu (right-click / long-press) on verse text
+document.getElementById('verses-container').addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.verse-pair')) e.preventDefault();
+});
 
 // Verse selection
 function toggleVerseSelection(verseEl) {
