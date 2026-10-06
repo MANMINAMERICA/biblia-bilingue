@@ -128,7 +128,8 @@ header {
     z-index: 100;
     display: flex;
     align-items: center;
-    padding: 12px 16px;
+    height: 46px;
+    padding: 0 16px;
     background: var(--primary);
     color: white;
     gap: 12px;
@@ -270,7 +271,7 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .chapter-btn:active { background: var(--primary); color: white; border-color: var(--primary); }
 
 /* Reading View */
-.reading-header { display: flex; align-items: center; gap: 10px; padding: 10px 0; margin-bottom: 8px; border-bottom: 1px solid var(--border); position: sticky; top: var(--stack-h, 104px); background: var(--bg); z-index: 50; }
+.reading-header { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0; margin-bottom: 8px; border-bottom: 1px solid var(--border); position: sticky; top: var(--stack-h, 104px); background: var(--bg); z-index: 50; }
 .reading-header-title { font-size: 1rem; font-weight: 700; color: var(--primary); white-space: nowrap; flex-shrink: 0; }
 .reading-nav { display: flex; gap: 4px; margin-left: auto; flex-shrink: 0; }
 .reading-nav button { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; transition: all 0.15s; font-size: 0.9rem; }
