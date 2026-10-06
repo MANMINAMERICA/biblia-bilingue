@@ -254,16 +254,14 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .home-book-item:active { background: var(--bg-secondary); }
 .home-book-num { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--primary); border: 1.5px solid var(--primary); border-radius: 50%; font-size: 0.7rem; font-weight: 600; flex-shrink: 0; }
 .home-book-name { flex: 1; font-weight: 500; font-size: 0.95rem; color: var(--text); }
-.home-book-arrow { color: var(--text-secondary); font-size: 0.9rem; }
 
 /* Books Grid */
 .section-title { font-size: 1.2rem; color: var(--primary); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
 .section-title.no-border { border-bottom: none; padding-bottom: 0; margin-bottom: 8px; }
 .books-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-.books-grid .home-book-item { padding: 8px; gap: 6px; }
+.books-grid .home-book-item { padding: 8px; gap: 10px; }
 .books-grid .home-book-num { width: 24px; height: 24px; font-size: 0.65rem; }
-.books-grid .home-book-name { font-size: 0.85rem; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.books-grid .home-book-arrow { font-size: 0.7rem; flex-shrink: 0; }
+.books-grid .home-book-name { font-size: 0.95rem; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Chapters Grid */
 .chapters-view-title { font-size: 1.3rem; font-weight: 700; color: var(--text); padding: 16px 0 12px; }

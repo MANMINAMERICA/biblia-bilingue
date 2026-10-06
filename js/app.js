@@ -491,7 +491,7 @@ function showBooksView(pushState = true) {
         const item = document.createElement('div');
         item.className = 'home-book-item';
         item.onclick = () => openBook(bookData);
-        item.innerHTML = `<div class="home-book-num">${index + 1}</div><div class="home-book-name">${displayName}</div><div class="home-book-arrow">&#9654;</div>`;
+        item.innerHTML = `<div class="home-book-num">${index + 1}</div><div class="home-book-name">${displayName}</div>`;
         item.title = displayName;
         container.appendChild(item);
     });
