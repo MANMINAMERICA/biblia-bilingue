@@ -1120,6 +1120,11 @@ function handleImportFile(event) {
 // Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    let hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadController) { hadController = true; return; }
+        if (!window.__swReloading) { window.__swReloading = true; window.location.reload(); }
+    });
 }
 
 window.addEventListener('resize', updateStickyOffsets);
