@@ -12,7 +12,7 @@ const BOOK_ORDER = [
     'Romanos','1 Corintios','2 Corintios','Gálatas','Efesios',
     'Filipenses','Colosenses','1 Tesalonicenses','2 Tesalonicenses',
     '1 Timoteo','2 Timoteo','Tito','Filemón','Hebreos',
-    'Santiago','1 Pedro','2 Pedro','1 Juan','Judas','Apocalipsis'
+    'Santiago','1 Pedro','2 Pedro','1 Juan','2 Juan','3 Juan','Judas','Apocalipsis'
 ];
 
 const OLD_TESTAMENT = BOOK_ORDER.slice(0, 39);
@@ -36,7 +36,8 @@ const BOOK_KO = {
     '2 Tesalonicenses': '데살로니가후서', '1 Timoteo': '디모데전서', '2 Timoteo': '디모데후서',
     'Tito': '디도서', 'Filemón': '빌레몬서', 'Hebreos': '히브리서',
     'Santiago': '야고보서', '1 Pedro': '베드로전서', '2 Pedro': '베드로후서',
-    '1 Juan': '요한일서', 'Judas': '유대서', 'Apocalipsis': '요한계시록'
+    '1 Juan': '요한일서', '2 Juan': '요한이서', '3 Juan': '요한삼서',
+    'Judas': '유대서', 'Apocalipsis': '요한계시록'
 };
 
 let bibleData = [];
@@ -58,6 +59,9 @@ async function init() {
     try {
         const response = await fetch('data/bible-combined.json');
         bibleData = await response.json();
+        if (BOOK_ORDER.length !== bibleData.length || bibleData.some(b => !BOOK_ORDER.includes(b.book))) {
+            console.error('BOOK_ORDER mismatch: list=' + BOOK_ORDER.length + ' data=' + bibleData.length);
+        }
         updateLoadingProgress(80, 'Preparando interfaz...');
     } catch (e) {
         updateLoadingProgress(100, 'Error cargando datos. Recarga la página.');
