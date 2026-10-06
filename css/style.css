@@ -252,7 +252,7 @@ header h1 { flex: 1; font-size: 1.2rem; font-weight: 600; }
 .home-books-list { display: flex; flex-direction: column; gap: 4px; }
 .home-book-item { display: flex; align-items: center; padding: 10px 12px; background: var(--bg-card); border-radius: 8px; cursor: pointer; transition: background 0.2s; border: 1px solid var(--border); gap: 10px; }
 .home-book-item:active { background: var(--bg-secondary); }
-.home-book-num { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--primary); color: white; border-radius: 50%; font-size: 0.7rem; font-weight: 600; flex-shrink: 0; }
+.home-book-num { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--primary); border: 1.5px solid var(--primary); border-radius: 50%; font-size: 0.7rem; font-weight: 600; flex-shrink: 0; }
 .home-book-name { flex: 1; font-weight: 500; font-size: 0.95rem; color: var(--text); }
 .home-book-arrow { color: var(--text-secondary); font-size: 0.9rem; }
 
