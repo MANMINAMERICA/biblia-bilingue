@@ -52,6 +52,7 @@ let langMode = 'dual';
 let themes = [];
 let currentThemeId = null;
 let fontSize = 16;
+const APP_VERSION = 'v57';
 
 async function fetchBibleData() {
     let lastError = null;
@@ -81,7 +82,7 @@ async function init() {
         }
         updateLoadingProgress(80, 'Preparando interfaz...');
     } catch (e) {
-        updateLoadingProgress(100, 'Error cargando datos. Recarga la página.');
+        updateLoadingProgress(100, 'Sin conexión y el texto aún no está guardado. Abre la app con internet una vez.');
         console.error(e);
         return;
     }
@@ -850,7 +851,27 @@ function saveVersesToTheme(themeId) {
 }
 
 // Settings
-function showSettingsView(pushState = true) { updateGitHubStatus(); showView('settings', pushState); }
+function showSettingsView(pushState = true) { updateGitHubStatus(); updateAppStatus(); showView('settings', pushState); }
+
+async function updateAppStatus() {
+    const el = document.getElementById('settings-app-status');
+    if (!el) return;
+    const online = navigator.onLine;
+    let swActive = false;
+    try {
+        const reg = await navigator.serviceWorker.getRegistration();
+        swActive = !!(reg && reg.active);
+    } catch (e) { }
+    let dataSaved = false;
+    try { dataSaved = !!(await caches.match('data/bible-combined.json')); } catch (e) { }
+    let msg;
+    if (swActive && dataSaved) msg = 'Listo para funcionar sin internet (' + APP_VERSION + ')';
+    else if (dataSaved) msg = 'Texto guardado. Modo sin internet activándose (' + APP_VERSION + '). Vuelve a abrir con internet.';
+    else if (!online) msg = 'Sin conexión y el texto no está guardado todavía (' + APP_VERSION + ').';
+    else msg = 'Guardando el texto bíblico... espera unos segundos con internet (' + APP_VERSION + ')';
+    el.textContent = msg;
+    el.classList.toggle('configured', swActive && dataSaved);
+}
 
 // Search
 function homeSearch() {
@@ -1139,9 +1160,13 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
     let hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
+        updateAppStatus();
         if (!hadController) { hadController = true; return; }
         if (!window.__swReloading) { window.__swReloading = true; window.location.reload(); }
     });
+    window.addEventListener('online', updateAppStatus);
+    window.addEventListener('offline', updateAppStatus);
+    setInterval(updateAppStatus, 5000);
 }
 
 window.addEventListener('resize', updateStickyOffsets);

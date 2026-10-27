@@ -1,7 +1,7 @@
-const CACHE_NAME = 'biblia-bilingue-v56';
+const CACHE_NAME = 'biblia-bilingue-v57';
 const DATA_CACHE = 'biblia-bilingue-data-1';
 const BASE = new URL('./', self.location.href).href;
-const DATA_FILE = new URL('data/bible-combined.json', BASE).href;
+const DATA_URL = new URL('data/bible-combined.json', BASE).href;
 const SHELL = [
     '',
     'index.html',
@@ -14,35 +14,47 @@ const SHELL = [
 
 self.addEventListener('install', event => {
     event.waitUntil(
-        Promise.all([
-            caches.open(CACHE_NAME).then(cache => {
-                return cache.addAll(SHELL.map(a => new URL(a, BASE).href));
-            }),
-            caches.open(DATA_CACHE).then(async cache => {
-                if (!(await cache.match(DATA_FILE))) {
-                    await cache.add(DATA_FILE);
-                }
-            })
-        ]).then(() => self.skipWaiting())
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(SHELL.map(a => new URL(a, BASE).href)))
+            .then(() => self.skipWaiting())
     );
 });
+
+async function ensureDataCached() {
+    try {
+        const cache = await caches.open(DATA_CACHE);
+        if (await cache.match(DATA_URL)) return true;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+                const response = await fetch(DATA_URL, { cache: 'no-store' });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                await cache.put(DATA_URL, response);
+                return true;
+            } catch (e) {
+                if (attempt < 3) await new Promise(r => setTimeout(r, 1500 * attempt));
+            }
+        }
+    } catch (e) { }
+    return false;
+}
 
 self.addEventListener('activate', event => {
     event.waitUntil(
-        caches.keys().then(keys => {
-            return Promise.all(
+        caches.keys()
+            .then(keys => Promise.all(
                 keys.filter(key => key !== CACHE_NAME && key !== DATA_CACHE)
                     .map(key => caches.delete(key))
-            );
-        }).then(() => self.clients.claim())
+            ))
+            .then(() => self.clients.claim())
+            .then(() => ensureDataCached())
     );
 });
 
-async function fetchAndCache(request) {
+async function fetchAndCache(request, cacheName) {
     const response = await fetch(request);
     if (response && response.status === 200) {
         const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+        caches.open(cacheName).then(cache => cache.put(request, clone));
     }
     return response;
 }
@@ -53,7 +65,8 @@ self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(request).then(cached => {
             if (cached) return cached;
-            return fetchAndCache(request).catch(() => {
+            const isData = request.url.indexOf('bible-combined.json') >= 0;
+            return fetchAndCache(request, isData ? DATA_CACHE : CACHE_NAME).catch(() => {
                 if (request.mode === 'navigate') {
                     return caches.match(new URL('index.html', BASE).href);
                 }
