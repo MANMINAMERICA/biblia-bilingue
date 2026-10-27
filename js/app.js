@@ -53,12 +53,29 @@ let themes = [];
 let currentThemeId = null;
 let fontSize = 16;
 
+async function fetchBibleData() {
+    let lastError = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            const response = await fetch('data/bible-combined.json');
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return await response.json();
+        } catch (e) {
+            lastError = e;
+            if (attempt < 3) {
+                updateLoadingProgress(15 + attempt * 10, 'Sin conexión. Reintentando...');
+                await new Promise(resolve => setTimeout(resolve, 1500 * attempt));
+            }
+        }
+    }
+    throw lastError;
+}
+
 // Initialize
 async function init() {
     updateLoadingProgress(10, 'Cargando base de datos...');
     try {
-        const response = await fetch('data/bible-combined.json');
-        bibleData = await response.json();
+        bibleData = await fetchBibleData();
         if (BOOK_ORDER.length !== bibleData.length || bibleData.some(b => !BOOK_ORDER.includes(b.book))) {
             console.error('BOOK_ORDER mismatch: list=' + BOOK_ORDER.length + ' data=' + bibleData.length);
         }
